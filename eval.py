@@ -39,8 +39,9 @@ def load_clean_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra
 def load_sodef_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra/hamed/SODEF_stuff/SODEF-PG/EXP/CIFAR10_resnet_Nov_1/full.pth'): 
     print('loading sodef model')
     from resnet import ResNet18
-    from _utils import MLP_OUT_ORTH512, MLP_OUT_LINEAR, ODEBlock, ODEfunc_mlp
+    from _utils import MLP_OUT_ORTH512, MLP_OUT_LINEAR, ODEBlock, ODEfunc_mlp, Identity
     backbone = ResNet18() 
+    backbone.linear = Identity()
     orthogonal_bridge = MLP_OUT_ORTH512()
 
     odefunc = ODEfunc_mlp(0)
@@ -49,8 +50,6 @@ def load_sodef_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra
     ODE_FCmodel = nn.Sequential(feature_layers, fc_layers).to(device)
     
     sodef_model = nn.Sequential(backbone, orthogonal_bridge, ODE_FCmodel)
-    print(sodef_model)
-    print(torch.load(path)['state_dict'].keys())
     k1, k2 = sodef_model.load_state_dict(torch.load(path)['state_dict'])
     print(k1, k2)
 

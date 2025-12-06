@@ -53,6 +53,7 @@ def load_sodef_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra
     k1, k2 = sodef_model.load_state_dict(torch.load(path)['state_dict'])
     print(k1, k2)
 
+    return sodef_model
 
 train_loader, test_loader, _, test_set = get_loaders(CIFAR10_DIR, BATCH_SIZE, "CIFAR10")
 

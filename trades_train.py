@@ -231,7 +231,6 @@ def phase2(ODE_FC_save_folder, train_savepath, test_savepath, load_phase2_path: 
                         temp2(odefunc, y00, text_file, odefunc=odefunc, time_df=time_df, device=device, exponent_f=exponent_f)
 
                         text_file.close()
-            break
     else: 
         saved_temp = torch.load(load_phase2_path)['state_dict']
         ODE_FCmodel.load_state_dict(saved_temp)
@@ -314,7 +313,6 @@ def evaluate_standard(test_loader, model):
             test_loss += loss.item() * y.size(0)
             test_acc += (output.max(1)[1] == y).sum().item()
             n += y.size(0)
-            break
     return test_loss/n, test_acc/n
 
 print('CLEAN, Test Loss, Test Acc', evaluate_standard(testloader, new_model_full))

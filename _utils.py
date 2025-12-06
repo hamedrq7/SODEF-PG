@@ -197,7 +197,6 @@ def test_phase3(net, epoch, testloader, criterion, device, folder_savemodel):
             progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                          % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
             
-            break
 
     # Save checkpoint.
     acc = 100.*correct/total
@@ -242,7 +241,6 @@ def train_phase3(net, epoch, trainloader, optimizer, criterion, device):
         progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                      % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
         
-        break
 
 def df_dz_regularizer(f, z, numm, odefunc, time_df, exponent, trans, exponent_off, transoffdig, device):
 #     print("+++++++++++")
@@ -354,7 +352,6 @@ def train_save_robustfeature(epoch, model, loader, device, optimizer, criterion)
         progress_bar(batch_idx, len(loader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                      % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
         
-        break 
 
 def test_save_robustfeature(epoch, model, loader, device, criterion, best_acc, save_folder, train_eval_loader):
     model.eval()
@@ -376,7 +373,6 @@ def test_save_robustfeature(epoch, model, loader, device, criterion, best_acc, s
             progress_bar(batch_idx, len(loader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                          % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
             
-            break
 
     # Save checkpoint.
     acc = 100.*correct/total

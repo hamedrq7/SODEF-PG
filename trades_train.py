@@ -40,7 +40,7 @@ def phase1(trainloader, testloader, train_eval_loader, max_row_dis_64_10_path, d
 
     # Load the pretrained model 
     from torchinfo import summary
-    from robustbench import load_model
+    # from robustbench import load_model
     # trades_backbone = load_model(model_name='Rebuffi2021Fixing_70_16_cutmix_extra', dataset='cifar10', threat_model='Linf')
     ###  trades_backbone = load_model(model_name='Standard', dataset='cifar10', threat_model='Linf')
     from resnet import ResNet18

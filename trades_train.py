@@ -300,22 +300,8 @@ new_model_full = phase3(odefunc, robust_backbone, robust_backbone_fc_features, t
                         # load_phase=True
                         )
 
-def evaluate_standard(test_loader, model):
-    test_loss = 0
-    test_acc = 0
-    n = 0
-    model.eval()
-    with torch.no_grad():
-        for i, (X, y) in enumerate(test_loader):
-            X, y = X.cuda(), y.cuda()
-            output = model((X))
-            loss = F.cross_entropy(output, y)
-            test_loss += loss.item() * y.size(0)
-            test_acc += (output.max(1)[1] == y).sum().item()
-            n += y.size(0)
-    return test_loss/n, test_acc/n
-
-print('CLEAN, Test Loss, Test Acc', evaluate_standard(testloader, new_model_full))
+from _utils import evaluate_standard
+print('CLEAN, Test Loss, Test Acc', evaluate_standard(testloader, new_model_full, device))
 
 # ################################################ attack ################################################   
 

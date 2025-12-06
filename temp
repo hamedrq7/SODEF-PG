@@ -1,0 +1,56 @@
+# interactive job submission
+runai submit   --name robust-cebra   --image registry.rcp.epfl.ch/upmwmathis-mirzaei/robust-cebra:v0.4   --gpu 4   --cpu 64   --memory 256Gi   --node-pools h200   --large-shm   --pvc home:/home/mirzaei   -e HOME=/home/mirzaei   -p upmwmathis-mirzaei   --preemptible   --interactive   --attach   --run-as-user   --command -- bash -lc '
+    cd ~/Robust_CEBRA && \
+    source .venv/bin/activate && \
+    bash'
+
+# train-type job submission
+runai submit   --name robust-cebra   --image registry.rcp.epfl.ch/upmwmathis-mirzaei/robust-cebra:v0.4   --gpu 4   --cpu 64   --memory 256Gi   --node-pools h200   --large-shm   --pvc home:/home/mirzaei   -e HOME=/home/mirzaei   -p upmwmathis-mirzaei   --preemptible  --attach   --run-as-user   --command -- bash -lc '
+    cd ~/Robust_CEBRA && \
+    source .venv/bin/activate && \
+    python cebra_trains.py 3'
+
+# job deletion
+runai delete job robust-cebra -p upmwmathis-mirzaei
+
+# tmux commands
+tmux new -s temp
+exit tmux: ctrl-b + d
+tmux attach -t temp
+
+
+
+# image creations
+
+# Dockerfile example:
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+
+# Python, venv, pip, git, tmux, and full terminfo so tmux works (arrows/backspace/mouse/colors)
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      python3.10 python3.10-venv python3-pip git tmux \
+      ncurses-base ncurses-term && \
+    # provide "python" alias for tools that expect it
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    rm -rf /var/lib/apt/lists/*
+
+# Sensible defaults
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+# Outside your shell TERM may be xterm-256color; tmux sets TERM=screen[-256color].
+# With ncurses-{base,term} installed, both are supported.
+ENV TERM=xterm-256color
+
+# Optional: nicer tmux defaults (mouse + big scrollback)
+RUN printf '%s\n' \
+  'set -g mouse on' \
+  'set -g history-limit 100000' \
+  > /etc/tmux.conf
+
+WORKDIR /workspace
+CMD ["bash"]
+
+# building the image
+docker build --platform linux/amd64 .   --tag registry.rcp.epfl.ch/upmwmathis-mirzaei/robust-cebra:v0.4   --build-arg LDAP_GROUPNAME=upmwmathis   --build-arg LDAP_GID=30299   --build-arg LDAP_USERNAME=mirzaei   --build-arg LDAP_UID=270850
+
+# pushing to registry
+docker push registry.rcp.epfl.ch/upmwmathis-mirzaei/robust-cebra:v0.4

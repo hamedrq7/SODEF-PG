@@ -5,6 +5,16 @@ from _utils import get_loaders
 from torchinfo import summary
 import torch.nn as nn 
 
+import torch
+import numpy as np
+import torch.nn as nn
+import torchvision
+from torchvision import transforms
+from tqdm import tqdm
+
+from torchvision import transforms
+import os
+
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -65,10 +75,49 @@ from _utils import evaluate_standard, evaluate_pgd
 print('CLEAN MODEL, Test Loss, Test Acc', evaluate_standard(test_loader, clean_model, device))
 print('SODEF MODEL, Test Loss, Test Acc', evaluate_standard(test_loader, sodef_model, device))
 
-print('CLEAN MODEL | PGD 8/255, Test Loss, Test Acc', evaluate_pgd(test_loader, clean_model, attack_iters=20, restarts=1, eps=8, step=1, use_CWloss=False))
-print('SODEF MODEL, Test Loss, Test Acc', evaluate_pgd(test_loader, sodef_model, attack_iters=20, restarts=1, eps=8, step=1, use_CWloss=False))
+# print('CLEAN MODEL | PGD 8/255, Test Loss, Test Acc', evaluate_pgd(test_loader, clean_model, attack_iters=20, restarts=1, eps=8, step=1, use_CWloss=False))
+# print('SODEF MODEL, Test Loss, Test Acc', evaluate_pgd(test_loader, sodef_model, attack_iters=20, restarts=1, eps=8, step=1, use_CWloss=False))
 
+"""
+CLEAN MODEL, Test Loss, Test Acc (0.18003013288974762, 0.9538)
+SODEF MODEL, Test Loss, Test Acc (0.25109421396255494, 0.9431)
+CLEAN MODEL | PGD 8/255, Test Loss, Test Acc (4.279358312988281, 0.0004)
+SODEF MODEL, Test Loss, Test Acc (2.214425745010376, 0.3433)
+"""
 
 # !wget https://zenodo.org/records/2535967/files/CIFAR-10-C.tar
 # !tar -xf /content/SODEF/trades_r/CIFAR-10-C.tar
 
+from _utils import CIFAR10_C, eval_cifar10c_name
+
+def get_cifar10c_acc(model, data_root: str, device): 
+    model = model.to(device)
+    model.eval()
+
+    # mean_accs = eval_cifar10c_severity(
+    #     root=TEST_DATA_ROOT, model=model, device=DEVICE,)
+
+    # for i in range(len(mean_accs)):
+    #     print(f'cifar10c-severity-{i+1}-acc', (mean_accs[i]))
+
+    corruptes = ['brightness', 'elastic_transform', 'gaussian_blur', 'impulse_noise',
+        'motion_blur', 'shot_noise', 'speckle_noise', 'contrast', 'fog', 'gaussian_noise',
+        'jpeg_compression', 'pixelate', 'snow', 'zoom_blur', 'defocus_blur', 'frost', 'glass_blur',
+        'saturate', 'spatter']
+
+    accs = []
+    for name in corruptes:
+        cifar10c_acc = eval_cifar10c_name(
+            root=data_root, model=model, device=device, name=name,
+            batch_size=BATCH_SIZE, )
+        accs.append(cifar10c_acc)
+        print(f'test (cifar10c-{name}) accuracy: {cifar10c_acc}')
+    print('Cifar10-C', np.array(accs).mean())
+
+    return accs
+
+data_root = '/mnt/data/hossein/Hossein_workspace/nips_cetra/hamed/SODEF_stuff/datasets/cifar10c'
+print('getting clean model accs')
+clean_model_accs = get_cifar10c_acc(clean_model, data_root, device)
+print('getting sodef model accs')
+sodef_model_accs = get_cifar10c_acc(sodef_model, data_root, device)

@@ -18,6 +18,9 @@ import geotorch
 from torch.nn.parameter import Parameter
 import math 
 from torchdiffeq import odeint_adjoint as odeint
+from PIL import Image
+
+
 
 ### Model related
 
@@ -693,3 +696,113 @@ def evaluate_pgd(test_loader, model, attack_iters, restarts, eps=8, step=2, use_
             pgd_acc += (output.max(1)[1] == y).sum().item()
             n += y.size(0)
     return pgd_loss/n, pgd_acc/n
+
+
+# Cifar10-C stuff
+ 
+from tqdm import tqdm
+class CIFAR10_C(Dataset):
+    def __init__(self, root, name, transform=None, target_transform=None):
+        corruptes = ['brightness', 'elastic_transform', 'gaussian_blur', 'impulse_noise',
+            'motion_blur', 'shot_noise', 'speckle_noise', 'contrast', 'fog', 'gaussian_noise',
+            'jpeg_compression', 'pixelate', 'snow', 'zoom_blur', 'defocus_blur', 'frost', 'glass_blur',
+            'saturate', 'spatter']
+
+        self.data = []
+        self.targets = []
+        self.transform = transform
+        self.target_transform = target_transform
+        assert name in corruptes
+        file_path = os.path.join(root, 'CIFAR-10-C', name+'.npy')
+        lable_path = os.path.join(root, 'CIFAR-10-C', 'labels.npy')
+        self.data = np.load(file_path)
+        self.targets = np.load(lable_path)
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+        img, target = self.data[index], self.targets[index]
+        img = Image.fromarray(img)
+
+        if self.transform is not None:
+            img = self.transform(img)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+        return img, target
+
+    def __len__(self):
+        return len(self.data)
+    
+
+def eval_cifar10c_name(root, model, device, name, batch_size, ):
+    transform_test = transforms.Compose([transforms.ToTensor(),])
+    testset = CIFAR10_C(root=root, name = name, transform=transform_test)
+    test_loader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
+
+    model.eval()
+
+    num_data = 0
+    corrects = 0
+
+    with torch.no_grad():
+        for inputs, targets in tqdm(test_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            num_data += targets.shape[0]
+            logits = model(inputs)
+            _, preds = torch.max(logits.data, dim=1)
+            corrects += (preds==targets).sum().item()
+
+    acc = corrects / num_data
+
+    return acc
+
+
+def eval_cifar10c(root, model, device, name, batch_size, ):
+    transform_test = transforms.Compose([transforms.ToTensor(),])
+    testset = CIFAR10_C(root=root, name = name, transform=transform_test)
+    test_loader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
+
+    model.eval()
+
+    num_data = [0] * (len(test_loader) // 100)
+    corrects = [0] * (len(test_loader) // 100)
+    batch_indx = 0
+    severity = 0
+
+    with torch.no_grad():
+        for inputs, targets in tqdm(test_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            num_data[severity] += targets.shape[0]
+
+            logits = model(inputs)
+            _, preds = torch.max(logits.data, dim=1)
+            corrects[severity] += (preds==targets).sum().item()
+
+            batch_indx += 1
+            if batch_indx % 100 == 0:
+                severity += 1
+
+    acc = [c / n if n > 0 else 0 for c, n in zip(corrects, num_data)]
+
+    return acc
+
+
+def eval_cifar10c_severity(root, model, device, ):
+    corruptes = ['brightness', 'elastic_transform', 'gaussian_blur', 'impulse_noise',
+        'motion_blur', 'shot_noise', 'speckle_noise', 'contrast', 'fog', 'gaussian_noise',
+        'jpeg_compression', 'pixelate', 'snow', 'zoom_blur', 'defocus_blur', 'frost', 'glass_blur',
+        'saturate', 'spatter']
+
+    accuracies_list = [
+        eval_cifar10c(root=root, model=model, device=device, name=name,
+            batch_size=100, ) for name in corruptes
+        ]
+
+    accuracies_matrix = np.vstack(accuracies_list)
+    mean_accuracies = np.mean(accuracies_matrix, axis=0)
+
+    return mean_accuracies

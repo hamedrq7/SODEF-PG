@@ -36,7 +36,7 @@ def load_clean_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra
 
     return model 
 
-def load_sodef_model(path: str = ''): 
+def load_sodef_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra/hamed/SODEF_stuff/SODEF-PG/EXP/CIFAR10_resnet_Nov_1/full.pth'): 
     print('loading sodef model')
     from resnet import ResNet18
     from _utils import MLP_OUT_ORTH512, MLP_OUT_LINEAR, ODEBlock, ODEfunc_mlp

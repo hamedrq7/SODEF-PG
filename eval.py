@@ -49,6 +49,8 @@ def load_sodef_model(path: str = '/mnt/data/hossein/Hossein_workspace/nips_cetra
     ODE_FCmodel = nn.Sequential(feature_layers, fc_layers).to(device)
     
     sodef_model = nn.Sequential(backbone, orthogonal_bridge, ODE_FCmodel)
+    print(sodef_model)
+    
     k1, k2 = sodef_model.load_state_dict(torch.load(path)['state_dict'])
     print(k1, k2)
 

@@ -31,7 +31,7 @@ from _utils import (
 )
 from torchdiffeq import odeint_adjoint as odeint
 
-def phase_one(trainloader, testloader, train_eval_loader, max_row_dis_64_10_path, device): 
+def phase1(trainloader, testloader, train_eval_loader, max_row_dis_64_10_path, device, load_phase1): 
     """
     Phase 1, save robust feature from backbone
     """
@@ -46,7 +46,9 @@ def phase_one(trainloader, testloader, train_eval_loader, max_row_dis_64_10_path
     from resnet import ResNet18
     trades_backbone = ResNet18()
     summary(trades_backbone, (1, 3, 32, 32))
-    print(trades_backbone)
+
+    k1, k2 = trades_backbone.load_state_dict(torch.load('/mnt/data/hossein/Hossein_workspace/nips_cetra/hamed/SODEF_stuff/pytorch-cifar/checkpoint/ckpt.pth')['net'])
+    print(k1, k2)
 
     # Create an orthogonal bridge layer: 
     # trades_backbone.logits = Identity()
@@ -66,14 +68,11 @@ def phase_one(trainloader, testloader, train_eval_loader, max_row_dis_64_10_path
         param.requires_grad = False
     phase1_model = nn.Sequential(trades_backbone, orthogonal_bridge_layer, fc_layer_phase1).to(device)
 
-     
     print(phase1_model)
     phase1_model = phase1_model.to(device)
-    
-    
+        
     data_gen = inf_generator(trainloader)
     batches_per_epoch = len(trainloader)
-
 
     best_acc = 0  # best test accuracy
     
@@ -83,23 +82,25 @@ def phase_one(trainloader, testloader, train_eval_loader, max_row_dis_64_10_path
     makedirs(robust_feature_savefolder)
     from _utils import train_save_robustfeature, test_save_robustfeature
 
-    for epoch in range(0, nepochs_save_robustfeature):
-        train_save_robustfeature(epoch, phase1_model, trainloader, device, optimizer, criterion)
-        # break
-        best_acc = test_save_robustfeature(epoch, phase1_model, testloader, device, criterion, best_acc, robust_feature_savefolder, train_eval_loader)
-        print('save robust feature to ' + robust_feature_savefolder)
-    
+    if not load_phase1: 
+
+        for epoch in range(0, nepochs_save_robustfeature):
+            train_save_robustfeature(epoch, phase1_model, trainloader, device, optimizer, criterion)
+            best_acc = test_save_robustfeature(epoch, phase1_model, testloader, device, criterion, best_acc, robust_feature_savefolder, train_eval_loader)
+            print('save robust feature to ' + robust_feature_savefolder)
+
     saved_temp = torch.load(robust_feature_savefolder+'/ckpt.pth')
     statedic_temp = saved_temp['net_save_robustfeature']
     phase1_model.load_state_dict(statedic_temp)
         
     return trades_backbone, orthogonal_bridge_layer
 
-# device = torch.device('cuda:0') 
-device = 'cpu'
+device = torch.device('cuda:0') 
+# device = 'cpu'
 
 
 robust_feature_savefolder = './EXP/CIFAR10_resnet_Nov_1'
+makedirs('./data')
 train_savepath='./data/CIFAR10_train_resnetNov1.npz'
 test_savepath='./data/CIFAR10_test_resnetNov1.npz'
     
@@ -125,10 +126,12 @@ torch.cuda.manual_seed(args.seed)
 
 
 trainloader, testloader, train_eval_loader, _ = get_loaders(args.data_dir, args.batch_size)
-robust_backbone, robust_backbone_fc_features = phase_one(trainloader, testloader, train_eval_loader, 'fc_max_row_64_10.pth', device)
+robust_backbone, robust_backbone_fc_features = phase1(trainloader, testloader, train_eval_loader, 'fc_max_row_64_10.pth', device, 
+    load_phase1=False
+    )
 
 ################################################ Phase 2, train ODE block ################################################    
-def phase2(ODE_FC_save_folder, train_savepath, test_savepath):
+def phase2(ODE_FC_save_folder, train_savepath, test_savepath, load_phase2_path: str = None):
     weight_diag = 10
     weight_offdiag = 0
     weight_f = 0.1
@@ -181,61 +184,67 @@ def phase2(ODE_FC_save_folder, train_savepath, test_savepath):
 
     optimizer = torch.optim.Adam(ODE_FCmodel.parameters(), lr=1e-2, eps=1e-3, amsgrad=True)
 
-    for itr in range(ODE_FC_ode_epoch * batches_per_epoch):
+    if load_phase2_path is None: 
+        for itr in range(ODE_FC_ode_epoch * batches_per_epoch):
 
-        optimizer.zero_grad()
-        x, y = data_gen.__next__()
-        x = x.to(device)
+            optimizer.zero_grad()
+            x, y = data_gen.__next__()
+            x = x.to(device)
 
-        modulelist = list(ODE_FCmodel)
-        y0 = x
-        x = modulelist[0](x)
-        y1 = x
+            modulelist = list(ODE_FCmodel)
+            y0 = x
+            x = modulelist[0](x)
+            y1 = x
 
-    #         y00 = y1.clone().detach().requires_grad_(True)
-        y00 = y0#.clone().detach().requires_grad_(True)
+        #         y00 = y1.clone().detach().requires_grad_(True)
+            y00 = y0#.clone().detach().requires_grad_(True)
 
-        regu1, regu2  = df_dz_regularizer(_, y00, numm=numm, odefunc=odefunc, time_df=time_df, exponent=exponent, trans=trans, exponent_off=exponent_off, transoffdig=transoffdig, device=device)
-        regu1 = regu1.mean()
-        regu2 = regu2.mean()
-        print("regu1:weight_diag "+str(regu1.item())+':'+str(weight_diag))
-        print("regu2:weight_offdiag "+str(regu2.item())+':'+str(weight_offdiag))
-        regu3 = f_regularizer(_, y00, odefunc=odefunc, time_df=time_df, device=device, exponent_f=exponent_f)
-        regu3 = regu3.mean()
-        print("regu3:weight_f "+str(regu3.item())+':'+str(weight_f))
-        loss = weight_f*regu3 + weight_diag*regu1+ weight_offdiag*regu2
+            regu1, regu2  = df_dz_regularizer(_, y00, numm=numm, odefunc=odefunc, time_df=time_df, exponent=exponent, trans=trans, exponent_off=exponent_off, transoffdig=transoffdig, device=device)
+            regu1 = regu1.mean()
+            regu2 = regu2.mean()
+            print("regu1:weight_diag "+str(regu1.item())+':'+str(weight_diag))
+            print("regu2:weight_offdiag "+str(regu2.item())+':'+str(weight_offdiag))
+            regu3 = f_regularizer(_, y00, odefunc=odefunc, time_df=time_df, device=device, exponent_f=exponent_f)
+            regu3 = regu3.mean()
+            print("regu3:weight_f "+str(regu3.item())+':'+str(weight_f))
+            loss = weight_f*regu3 + weight_diag*regu1+ weight_offdiag*regu2
 
 
-        loss.backward()
-        optimizer.step()
-        torch.cuda.empty_cache()
-        
-        if itr % batches_per_epoch == 0:
-            if itr ==0:
-                recordtext = os.path.join(ODE_FC_save_folder, 'output.txt')
-                if os.path.isfile(recordtext):
-                    os.remove(recordtext)
-                # continue
+            loss.backward()
+            optimizer.step()
+            torch.cuda.empty_cache()
+            
+            if itr % batches_per_epoch == 0:
+                if itr ==0:
+                    recordtext = os.path.join(ODE_FC_save_folder, 'output.txt')
+                    if os.path.isfile(recordtext):
+                        os.remove(recordtext)
+                    # continue
 
-            with torch.no_grad():
-                if True:#val_acc > best_acc:
-                    torch.save({'state_dict': ODE_FCmodel.state_dict()}, os.path.join(ODE_FC_save_folder, 'model_'+str(itr // batches_per_epoch)+'.pth'))
-                with open(recordtext, "a") as text_file:
-                    text_file.write("Epoch {:04d}".format(itr // batches_per_epoch)+'\n')
+                with torch.no_grad():
+                    if True:#val_acc > best_acc:
+                        torch.save({'state_dict': ODE_FCmodel.state_dict()}, os.path.join(ODE_FC_save_folder, 'model_'+str(itr // batches_per_epoch)+'.pth'))
+                    with open(recordtext, "a") as text_file:
+                        text_file.write("Epoch {:04d}".format(itr // batches_per_epoch)+'\n')
 
-                    temp1(odefunc, y00, text_file, numm=numm, odefunc=odefunc, time_df=time_df, device=device, exponent=exponent, trans=trans, exponent_off=exponent_off, transoffdig=transoffdig)
-                    temp2(odefunc, y00, text_file, odefunc=odefunc, time_df=time_df, device=device, exponent_f=exponent_f)
+                        temp1(odefunc, y00, text_file, numm=numm, odefunc=odefunc, time_df=time_df, device=device, exponent=exponent, trans=trans, exponent_off=exponent_off, transoffdig=transoffdig)
+                        temp2(odefunc, y00, text_file, odefunc=odefunc, time_df=time_df, device=device, exponent_f=exponent_f)
 
-                    text_file.close()
-        # break
+                        text_file.close()
+            break
+    else: 
+        saved_temp = torch.load(load_phase2_path)['state_dict']
+        ODE_FCmodel.load_state_dict(saved_temp)
 
     return ODE_FCmodel, odefunc
 
-ODE_FCmodel, odefunc = phase2(ODE_FC_save_folder = robust_feature_savefolder, train_savepath=train_savepath, test_savepath=test_savepath)
+ODE_FCmodel, odefunc = phase2(ODE_FC_save_folder = robust_feature_savefolder, train_savepath=train_savepath, test_savepath=test_savepath, 
+                              # load_phase2_path='./EXP/CIFAR10_resnet_Nov_1/model_0.pth'
+                              )
 
 
 ################################################ Phase 3, train final FC ################################################    
-def phase3(odefunc, robust_backbone, robust_backbone_fc_features, trainloader, testloader):
+def phase3(odefunc, robust_backbone, robust_backbone_fc_features, trainloader, testloader, load_phase=False):
     from _utils import ODEBlock
 
     ODE_FC_fcbatch = 128
@@ -266,28 +275,31 @@ def phase3(odefunc, robust_backbone, robust_backbone_fc_features, trainloader, t
 
     from _utils import train_phase3, test_phase3
     
-    best_acc = 0
+    if not load_phase: 
+        best_acc = 0
         
-    for epoch in range(0, ODE_FC_fc_epoch):
-        
-        train_phase3(new_model_full, epoch, trainloader=trainloader, optimizer=optimizer, criterion=criterion, device=device)
-        # train_mixup(new_model_full, epoch)
-
-        with torch.no_grad():
-            val_acc = accuracy(new_model_full, testloader, device)
-            if val_acc > best_acc:
-                torch.save({'state_dict': new_model_full.state_dict()}, os.path.join(ODE_FC_save_folder, 'full.pth'))
-                best_acc = val_acc
-            print("Epoch {:04d} |  Test Acc {:.4f}".format(epoch,  val_acc))
+        for epoch in range(0, ODE_FC_fc_epoch):
             
-        # break
+            train_phase3(new_model_full, epoch, trainloader=trainloader, optimizer=optimizer, criterion=criterion, device=device)
+            # train_mixup(new_model_full, epoch)
 
-    # saved_temp = torch.load(os.path.join(ODE_FC_save_folder, 'full.pth'))
-    # statedic_temp = saved_temp['state_dict']
-    # new_model_full.load_state_dict(statedic_temp)
+            with torch.no_grad():
+                val_acc = accuracy(new_model_full, testloader, device)
+                if val_acc > best_acc:
+                    torch.save({'state_dict': new_model_full.state_dict()}, os.path.join(ODE_FC_save_folder, 'full.pth'))
+                    best_acc = val_acc
+                print("Epoch {:04d} |  Test Acc {:.4f}".format(epoch,  val_acc))
+                
+            # break
+    else: 
+        saved_temp = torch.load(os.path.join(ODE_FC_save_folder, 'full.pth'))
+        statedic_temp = saved_temp['state_dict']
+        new_model_full.load_state_dict(statedic_temp)
     return new_model_full
 
-new_model_full = phase3(odefunc, robust_backbone, robust_backbone_fc_features, trainloader=trainloader, testloader=testloader)
+new_model_full = phase3(odefunc, robust_backbone, robust_backbone_fc_features, trainloader=trainloader, testloader=testloader,
+                        # load_phase=True
+                        )
 
 def evaluate_standard(test_loader, model):
     test_loss = 0

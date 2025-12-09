@@ -88,4 +88,4 @@ bert_fc_layer = get_bert_fc_layer(CLF_LAYER_DIR).to(device)
 
 bert_fc_features_sanity_check(bert_fc_layer, train_feature_loader, test_feature_loader, device)
 
-orth_bridge_layer = phase1(train_feature_loader, test_feature_loader, device, False)
+orth_bridge_layer = phase1(train_feature_loader, test_feature_loader, device, False, f'{LOG_PATH}/{EXP_NAME}')

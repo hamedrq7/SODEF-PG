@@ -121,3 +121,48 @@ print('getting clean model accs')
 clean_model_accs = get_cifar10c_acc(clean_model, data_root, device)
 print('getting sodef model accs')
 sodef_model_accs = get_cifar10c_acc(sodef_model, data_root, device)
+
+"""
+CLEAN MODEL: 
+test (cifar10c-brightness) accuracy: 0.94112
+test (cifar10c-elastic_transform) accuracy: 0.8565
+test (cifar10c-gaussian_blur) accuracy: 0.73862
+test (cifar10c-impulse_noise) accuracy: 0.53148
+test (cifar10c-motion_blur) accuracy: 0.80182
+test (cifar10c-shot_noise) accuracy: 0.60228
+test (cifar10c-speckle_noise) accuracy: 0.64242
+test (cifar10c-contrast) accuracy: 0.79884
+test (cifar10c-fog) accuracy: 0.89902
+test (cifar10c-gaussian_noise) accuracy: 0.4705
+test (cifar10c-jpeg_compression) accuracy: 0.8027
+test (cifar10c-pixelate) accuracy: 0.77314
+test (cifar10c-snow) accuracy: 0.84446
+test (cifar10c-zoom_blur) accuracy: 0.80068
+test (cifar10c-defocus_blur) accuracy: 0.83738
+test (cifar10c-frost) accuracy: 0.80884
+test (cifar10c-glass_blur) accuracy: 0.56118
+test (cifar10c-saturate) accuracy: 0.9261
+test (cifar10c-spatter) accuracy: 0.85468
+Cifar10-C 0.762724210526315
+SODEF MODEL: 
+test (cifar10c-brightness) accuracy: 0.94176
+test (cifar10c-elastic_transform) accuracy: 0.83848
+test (cifar10c-gaussian_blur) accuracy: 0.73286
+test (cifar10c-impulse_noise) accuracy: 0.49838
+test (cifar10c-motion_blur) accuracy: 0.79482
+test (cifar10c-shot_noise) accuracy: 0.55988
+test (cifar10c-speckle_noise) accuracy: 0.59226
+test (cifar10c-contrast) accuracy: 0.83328
+test (cifar10c-fog) accuracy: 0.90236
+test (cifar10c-gaussian_noise) accuracy: 0.44582
+test (cifar10c-jpeg_compression) accuracy: 0.76416
+test (cifar10c-pixelate) accuracy: 0.73912
+test (cifar10c-snow) accuracy: 0.84294
+test (cifar10c-zoom_blur) accuracy: 0.78788
+test (cifar10c-defocus_blur) accuracy: 0.82904
+test (cifar10c-frost) accuracy: 0.82334
+test (cifar10c-glass_blur) accuracy: 0.55078
+test (cifar10c-saturate) accuracy: 0.90094
+test (cifar10c-spatter) accuracy: 0.828
+Cifar10-C 0.7476894736842105
+"""

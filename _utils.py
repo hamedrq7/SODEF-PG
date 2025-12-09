@@ -109,6 +109,16 @@ class MLP_OUT_BALL(nn.Module):
         return h1  
         
 
+class MLP_OUT_BALL_given_mat(nn.Module):
+    def __init__(self, mat, dim, num_classes):
+        super(MLP_OUT_BALL_given_mat, self,).__init__()
+        assert mat.shape[0] == dim and mat.shape[1] == num_classes, 'This should hold: mat.shape[0] == dim and mat.shape[1] == num_classes'
+        self.fc0 = nn.Linear(dim, num_classes, bias=False)
+        matrix_temp = torch.tensor(mat)
+        self.fc0.weight.data = matrix_temp
+    def forward(self, input_):
+        h1 = self.fc0(input_)
+        return h1  
 
 class Identity(nn.Module):
     def __init__(self):
@@ -526,9 +536,10 @@ def get_loaders(dir_, batch_size, DATASET='CIFAR10'):
     )
     return train_loader, test_loader, train_loader__, test_dataset
 
-import sys 
-_, term_width = os.popen('stty size', 'r').read().split()
-term_width = int(term_width)
+# import sys 
+# _, term_width = os.popen('stty size', 'r').read().split()
+# term_width = int(term_width)
+term_width = 64 
 
 TOTAL_BAR_LENGTH = 65.
 last_time = time.time()

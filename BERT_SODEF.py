@@ -121,7 +121,7 @@ class Phase2Model(nn.Module):
         before_ode_feats = self.bridge_768_64(x)
         after_ode_feats = self.ode_block(before_ode_feats)
         logits = self.fc(after_ode_feats)
-        return after_ode_feats, logits
+        return before_ode_feats, after_ode_feats, logits
     
 def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phase2_path: str = None, fc_layer = None):
     import os 
@@ -173,7 +173,7 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
             # x = modulelist[0](x)
             # y1 = x
             # y00 = y0 #.clone().detach().requires_grad_(True)
-
+            x, _, _ = phase2_model(x)
             regu1, regu2  = df_dz_regularizer(None, x, numm=numm, odefunc=odefunc, time_df=time_df, exponent=exponent, trans=trans, exponent_off=exponent_off, transoffdig=transoffdig, device=device)
             regu1 = regu1.mean()
             regu2 = regu2.mean()

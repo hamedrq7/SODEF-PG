@@ -106,12 +106,13 @@ class Phase2Model(nn.Module):
         if isinstance(layer_names, str):
             layer_names = [layer_names]
 
-        # Iterate over all parameters and names in the model
+        for target in layer_names:
+            if target in self._modules:   # only top-level modules
+                module = self._modules[target]
+                for param in module.parameters():
+                    param.requires_grad = False
+
         for name, param in self.named_parameters():
-            # Freeze if name contains any target substring
-            if any(layer_name in name for layer_name in layer_names):
-                param.requires_grad = False
-                
             if param.requires_grad == True: 
                 print(f"[TRAINABLE] {name}")
             else:

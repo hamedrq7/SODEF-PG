@@ -112,7 +112,7 @@ class MLP_OUT_BALL(nn.Module):
 class MLP_OUT_BALL_given_mat(nn.Module):
     def __init__(self, mat, dim, num_classes):
         super(MLP_OUT_BALL_given_mat, self,).__init__()
-        assert mat.shape[0] == dim and mat.shape[1] == num_classes, 'This should hold: mat.shape[0] == dim and mat.shape[1] == num_classes'
+        assert mat.shape[1] == dim and mat.shape[0] == num_classes, 'This should hold: mat.shape[0] == dim and mat.shape[1] == num_classes'
         self.fc0 = nn.Linear(dim, num_classes, bias=False)
         matrix_temp = torch.tensor(mat)
 

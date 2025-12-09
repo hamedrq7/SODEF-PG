@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn 
 import numpy as np 
 from tqdm import trange
-
+from torch.utils.data import DataLoader
 
 from utils_bert import get_sst2_feature_dataset, get_bert_fc_layer
 from _utils import makedirs
@@ -15,6 +15,7 @@ from utils_bert import get_max_row_dist_for_2_classes, check_max_row_dist_matrix
 BERT_CKPT_DIR = '/mnt/data/hossein/Hossein_workspace/nips_cetra/hamed/BERT-PG/training_script/BERT/models/no_trainer/sst2'
 FEATS_DIR = f'{BERT_CKPT_DIR}/saving_feats/{0}_feats.npz'
 CLF_LAYER_DIR = f'{BERT_CKPT_DIR}/bert_clf.pth'
+PHASE1_BS = 128
 
 device = 'cpu' if not torch.cuda.is_available() else torch.device('cuda:0')
 
@@ -59,7 +60,17 @@ def phase1(trainloader, testloader, device, load_phase1: bool = False, base_fold
             
     return orthogonal_bridge_layer
 
+
 sst2_train_feature_set, sst2_test_feature_set = get_sst2_feature_dataset(FEATS_DIR)
+train_feature_loader = DataLoader(sst2_train_feature_set,
+    batch_size=PHASE1_BS,
+    shuffle=True, num_workers=2
+)
+test_feature_loader = DataLoader(sst2_test_feature_set,
+    batch_size=PHASE1_BS,
+    shuffle=False, num_workers=2
+)
+
 bert_fc_layer = get_bert_fc_layer(CLF_LAYER_DIR).to(device)
 
 bert_fc_features_sanity_check(bert_fc_layer, sst2_train_feature_set, sst2_test_feature_set, device)

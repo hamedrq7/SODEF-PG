@@ -22,9 +22,11 @@ from PIL import Image
 from tqdm import tqdm 
 
 class BERT_feature_dataset(Dataset): 
-    def __init__(self, x_np, y_np):
-        self.x = x_np
-        self.y = y_np
+    def __init__(self, x_np, y_np, transform=None, target_transform=None):
+        self.x = torch.from_numpy(x_np).float()  
+        self.y = torch.from_numpy(y_np).long()
+        self.transform = transform
+        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.x)
@@ -32,7 +34,15 @@ class BERT_feature_dataset(Dataset):
     def __getitem__(self, idx):
         x = self.x[idx,...]
         y = self.y[idx]
-            
+        
+        # Apply transform to x
+        if self.transform:
+            x = self.transform(x)
+
+        # Optional label transform
+        if self.target_transform:
+            y = self.target_transform(y)
+
         return x,y
     
 def get_sst2_feature_dataset(path: str): 

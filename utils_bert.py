@@ -152,7 +152,8 @@ def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder):
     total = 0
     with torch.no_grad():
         for batch_idx, (inputs, targets) in enumerate(loader):
-
+            print(inputs.shape, targets.shape)
+            
             inputs, targets = inputs.to(device), targets.to(device)
             x = inputs
             outputs = model(x)

@@ -153,8 +153,9 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
     use_fc_from_phase1 = not fc_layer is None
     print('use_fc_from_phase1', use_fc_from_phase1)
     phase2_model = Phase2Model(bridge_768_64, ODEBlocktemp(odefunc), MLP_OUT_LINEAR(dim1=64, dim2=2) if not use_fc_from_phase1 else fc_layer)
-    phase2_model.freeze_layer_given_name(['bridge_768_64', 'fc']).to(device)
-
+    phase2_model.freeze_layer_given_name(['bridge_768_64', 'fc'])
+    phase2_model = phase2_model.to(device)
+    
     train_data_gen = inf_generator(trainloader)
     batches_per_epoch = len(train_data_gen)
 

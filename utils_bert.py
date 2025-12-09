@@ -126,7 +126,8 @@ def train_ce(epoch, model, loader, device, optimizer, criterion):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         x = inputs
-
+        print(inputs.shape)
+        print(targets.shape)
         outputs = model(x)
         
         loss = criterion(outputs, targets)

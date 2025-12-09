@@ -47,7 +47,7 @@ def phase1(trainloader, testloader, device, load_phase1: bool = False, base_fold
 
     orthogonal_bridge_layer = MLP_OUT_ORTH_X_X(feature_dim, bridge_dim) # make it so you pass bridge_dim
     max_row_mat = get_max_row_dist_for_2_classes(bridge_dim)
-    check_max_row_dist_matrix(max_row_mat, 2)
+    check_max_row_dist_matrix(max_row_mat.T, 2)
     fc_layer_phase1 = MLP_OUT_BALL_given_mat(max_row_mat, dim=bridge_dim, num_classes=2)
     
     phase1_model = nn.Sequential(orthogonal_bridge_layer, fc_layer_phase1).to(device)

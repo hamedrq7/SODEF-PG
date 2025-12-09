@@ -58,7 +58,7 @@ def get_max_row_dist_for_2_classes(dim = 64):
     v2 = -u
 
     W_binary_optimal = np.stack([v1, v2], axis=1)  # shape (64, 2)
-    return W_binary_optimal
+    return W_binary_optimal.T
 
 def check_max_row_dist_matrix(V, num_classes = 10):
     assert V.shape[1] == num_classes, 'V should be of shape [D, num_classes] '

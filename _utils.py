@@ -115,9 +115,7 @@ class MLP_OUT_BALL_given_mat(nn.Module):
         assert mat.shape[0] == dim and mat.shape[1] == num_classes, 'This should hold: mat.shape[0] == dim and mat.shape[1] == num_classes'
         self.fc0 = nn.Linear(dim, num_classes, bias=False)
         matrix_temp = torch.tensor(mat)
-        print(self.fc0.weight.data.shape, matrix_temp.shape)
-        exit()
-        
+
         self.fc0.weight.data = matrix_temp
     def forward(self, input_):
         h1 = self.fc0(input_)

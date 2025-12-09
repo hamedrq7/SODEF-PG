@@ -91,7 +91,7 @@ class ODEfunc_mlp(nn.Module):
     
 class MLP_OUT_LINEAR(nn.Module):
     def __init__(self):
-        super(MLP_OUT_LINEAR, self).__init__()
+        super(MLP_OUT_LINEAR, self, dim1=64, dim2=10).__init__()
         self.fc0 = nn.Linear(64, 10)
     def forward(self, input_):
         h1 = self.fc0(input_)
@@ -265,7 +265,7 @@ def train_phase3(net, epoch, trainloader, optimizer, criterion, device):
         
 
 def df_dz_regularizer(f, z, numm, odefunc, time_df, exponent, trans, exponent_off, transoffdig, device):
-#     print("+++++++++++")
+    # print("+++++++++++")
     regu_diag = 0.
     regu_offdiag = 0.0
     for ii in np.random.choice(z.shape[0], min(numm,z.shape[0]),replace=False):

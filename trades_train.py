@@ -155,7 +155,6 @@ def phase2(ODE_FC_save_folder, train_savepath, test_savepath, load_phase2_path: 
     from _utils import DensemnistDatasetTest, DensemnistDatasetTrain
 
     makedirs(ODE_FC_save_folder)
-
     
     odefunc = ODEfunc_mlp(0)
     feature_layers = ODEBlocktemp(odefunc)

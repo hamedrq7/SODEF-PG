@@ -122,7 +122,7 @@ def train_ce(epoch, model, loader, device, optimizer, criterion):
     train_loss = 0
     correct = 0
     total = 0
-    for batch_idx, (inputs, targets) in enumerate((loader)):
+    for batch_idx, (inputs, targets) in enumerate(loader):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         x = inputs
@@ -151,8 +151,7 @@ def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder):
     correct = 0
     total = 0
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate((loader)):
-            print(inputs.shape, targets.shape)
+        for batch_idx, (inputs, targets) in enumerate(loader):
 
             inputs, targets = inputs.to(device), targets.to(device)
             x = inputs
@@ -160,7 +159,6 @@ def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder):
             loss = criterion(outputs, targets)
 
             test_loss += loss.item()
-            print(outputs)
             _, predicted = outputs.max(1)
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()

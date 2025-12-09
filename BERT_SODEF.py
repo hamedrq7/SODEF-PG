@@ -92,7 +92,7 @@ bert_fc_layer = get_bert_fc_layer(CLF_LAYER_DIR).to(device)
 bert_fc_features_sanity_check(bert_fc_layer, train_feature_loader, test_feature_loader, device)
 
 phase1_model = phase1(train_feature_loader, test_feature_loader, device, base_folder = f'{LOG_PATH}/{EXP_NAME}',
-                      load_phase1=True
+                      # load_phase1=True
                       )
 
 class Phase2Model(nn.Module): 

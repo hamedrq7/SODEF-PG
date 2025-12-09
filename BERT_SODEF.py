@@ -11,7 +11,7 @@ import sys
 
 from utils_bert import get_sst2_feature_dataset, get_bert_fc_layer, Logger
 from _utils import makedirs
-from _utils import MLP_OUT_ORTH1024, MLP_OUT_BALL_given_mat
+from _utils import MLP_OUT_ORTH_X_X, MLP_OUT_BALL_given_mat
 from utils_bert import get_max_row_dist_for_2_classes, check_max_row_dist_matrix, train_ce, test_ce
 
 LOG_PATH = 'testingBertSodef'
@@ -39,12 +39,13 @@ def bert_fc_features_sanity_check(bert_clf_layer, trainloader, testloader, devic
     print('Test Acc, Loss', te_res['acc'], te_res['loss'])
 
 def phase1(trainloader, testloader, device, load_phase1: bool = False, base_folder: str = None): 
+    feature_dim = 768
     n_epochs = 4 
     bridge_dim = 64
     phase1_save_folder = f'{base_folder}/phase1'
     makedirs(phase1_save_folder)
 
-    orthogonal_bridge_layer = MLP_OUT_ORTH1024() # make it so you pass bridge_dim
+    orthogonal_bridge_layer = MLP_OUT_ORTH_X_X(feature_dim, bridge_dim) # make it so you pass bridge_dim
     max_row_mat = get_max_row_dist_for_2_classes(bridge_dim)
     check_max_row_dist_matrix(max_row_mat, 2)
     fc_layer_phase1 = MLP_OUT_BALL_given_mat(max_row_mat, dim=bridge_dim, num_classes=2)

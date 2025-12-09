@@ -178,7 +178,15 @@ class MLP_OUT_ORTH1024(nn.Module):
     def forward(self, input_):
         h1 = self.fc0(input_)
         return h1
-    
+
+class MLP_OUT_ORTH_X_X(nn.Module):
+    def __init__(self, dim1, dim2):
+        super(MLP_OUT_ORTH_X_X, self).__init__()
+        self.fc0 = ORTHFC(dim1, dim2, False)
+    def forward(self, input_):
+        h1 = self.fc0(input_)
+        return h1
+     
 class MLP_OUT_ORTH512(nn.Module):
     def __init__(self):
         super(MLP_OUT_ORTH512, self).__init__()

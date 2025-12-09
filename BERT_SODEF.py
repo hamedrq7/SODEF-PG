@@ -91,7 +91,9 @@ bert_fc_layer = get_bert_fc_layer(CLF_LAYER_DIR).to(device)
 
 bert_fc_features_sanity_check(bert_fc_layer, train_feature_loader, test_feature_loader, device)
 
-phase1_model = phase1(train_feature_loader, test_feature_loader, device, False, f'{LOG_PATH}/{EXP_NAME}')
+phase1_model = phase1(train_feature_loader, test_feature_loader, device, False, f'{LOG_PATH}/{EXP_NAME}',
+                      load_phase1=True
+                      )
 
 class Phase2Model(nn.Module): 
     def __init__(self, bridge_768_64, ode_block, fc): 
@@ -148,7 +150,9 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
     makedirs(ODE_FC_save_folder)
 
     odefunc = ODEfunc_mlp(0)
-    phase2_model = Phase2Model(bridge_768_64, ODEBlocktemp(odefunc), MLP_OUT_LINEAR(dim1=64, dim2=2) if not fc_layer is None else fc_layer)
+    use_fc_from_phase1 = not fc_layer is None
+    print('use_fc_from_phase1', use_fc_from_phase1)
+    phase2_model = Phase2Model(bridge_768_64, ODEBlocktemp(odefunc), MLP_OUT_LINEAR(dim1=64, dim2=2) if not use_fc_from_phase1 else fc_layer)
     phase2_model.freeze_layer_given_name(['bridge_768_64', 'fc']).to(device)
 
     train_data_gen = inf_generator(trainloader)

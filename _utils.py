@@ -90,9 +90,9 @@ class ODEfunc_mlp(nn.Module):
         return out
     
 class MLP_OUT_LINEAR(nn.Module):
-    def __init__(self):
-        super(MLP_OUT_LINEAR, self, dim1=64, dim2=10).__init__()
-        self.fc0 = nn.Linear(64, 10)
+    def __init__(self, dim1=64, dim2=10):
+        super(MLP_OUT_LINEAR, self, ).__init__()
+        self.fc0 = nn.Linear(dim1, dim2)
     def forward(self, input_):
         h1 = self.fc0(input_)
         return h1

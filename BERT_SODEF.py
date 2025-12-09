@@ -73,6 +73,6 @@ test_feature_loader = DataLoader(sst2_test_feature_set,
 
 bert_fc_layer = get_bert_fc_layer(CLF_LAYER_DIR).to(device)
 
-bert_fc_features_sanity_check(bert_fc_layer, sst2_train_feature_set, sst2_test_feature_set, device)
+bert_fc_features_sanity_check(bert_fc_layer, train_feature_loader, test_feature_loader, device)
 
 # orth_bridge_layer = phase1(None, None, device, False)

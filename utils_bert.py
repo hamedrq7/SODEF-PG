@@ -48,17 +48,17 @@ def get_sst2_feature_dataset(path: str):
     return tr_ds, val_ds
 
 
-def get_max_row_dist_for_2_classes(dim = 64):
-
-    # make any random unit vector in R^64
-    u = np.random.randn(dim)
-    u /= np.linalg.norm(u)
+def get_max_row_dist_for_2_classes(dim = 64, device="cpu"):
+    # random unit vector in R^64
+    u = torch.randn(dim, device=device)
+    u = u / u.norm()
 
     v1 = u
     v2 = -u
 
-    W_binary_optimal = np.stack([v1, v2], axis=1)  # shape (64, 2)
-    return W_binary_optimal.T
+    # shape = (feature_dim, 2)
+    W = torch.stack([v1, v2], dim=1)
+    return W.T
 
 def check_max_row_dist_matrix(V, num_classes = 10):
     assert V.shape[1] == num_classes, 'V should be of shape [D, num_classes] '

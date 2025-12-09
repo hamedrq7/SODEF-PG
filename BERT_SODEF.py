@@ -61,10 +61,10 @@ def phase1(trainloader, testloader, device, load_phase1: bool = False, base_fold
     if not load_phase1: 
         for epoch in trange(0, n_epochs):
             tr_results = train_ce(epoch, phase1_model, trainloader, device, optimizer, criterion)
-            print('tr_acc, tr_loss', tr_results['acc'].item(), tr_results['loss'].item())
+            print('tr_acc, tr_loss', tr_results['acc'], tr_results['loss'])
             te_results = test_ce(epoch, phase1_model, testloader, device, criterion, best_acc, phase1_save_folder)
             best_acc = te_results['best_acc']
-            print('te_acc, te_loss', te_results['acc'].item(), te_results['loss'].item())
+            print('te_acc, te_loss', te_results['acc'], te_results['loss'])
             
     else:     
         saved_temp = torch.load(phase1_save_folder+'/phase1_best_acc_ckpt.pth')

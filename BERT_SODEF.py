@@ -15,7 +15,7 @@ from _utils import MLP_OUT_ORTH_X_X, MLP_OUT_BALL_given_mat
 from utils_bert import get_max_row_dist_for_2_classes, check_max_row_dist_matrix, train_ce, test_ce, set_seed_reproducability
 
 LOG_PATH = 'testingBertSodef'
-EXP_NAME = 'onos'
+EXP_NAME = 'duos'
 SEED = 42
 
 makedirs(f'{LOG_PATH}/{EXP_NAME}')

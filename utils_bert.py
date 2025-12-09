@@ -106,8 +106,8 @@ class BertCLF(nn.Module):
     def forward(self, x): 
         return self.classifier(self.dropout(x))
 
-def get_bert_fc_layer(path): 
-    dummy_model = BertCLF(1024, 2)
+def get_bert_fc_layer(path, dim_in = 768, num_classes = 2): 
+    dummy_model = BertCLF(dim_in, num_classes)
     missing_keys, unexpected_keys = dummy_model.load_state_dict(torch.load(path), strict=False)
     print('missing_keys', missing_keys, 'len unexpected_keys', len(unexpected_keys))
 

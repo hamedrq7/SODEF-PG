@@ -19,8 +19,8 @@ CLF_LAYER_DIR = f'{BERT_CKPT_DIR}/bert_clf.pth'
 device = 'cpu' if not torch.cuda.is_available() else torch.device('cuda:0')
 
 def bert_fc_features_sanity_check(bert_clf_layer, trainloader, testloader, device): 
-    tr_res = test_ce(-1, bert_clf_layer, trainloader, nn.CrossEntropyLoss(), 110, '')
-    te_res = test_ce(-1, bert_clf_layer, testloader, nn.CrossEntropyLoss(), 110, '')
+    tr_res = test_ce(-1, bert_clf_layer, trainloader, device, nn.CrossEntropyLoss(), 110, '')
+    te_res = test_ce(-1, bert_clf_layer, testloader, device, nn.CrossEntropyLoss(), 110, '')
 
     print('Train Acc, Loss', tr_res['acc'], tr_res['loss'])
     print('Test Acc, Loss', te_res['acc'], te_res['loss'])

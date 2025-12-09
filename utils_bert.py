@@ -32,7 +32,7 @@ class BERT_feature_dataset(Dataset):
         return len(self.x)
 
     def __getitem__(self, idx):
-        x = self.x[idx,...]
+        x = self.x[idx,:]
         y = self.y[idx]
         
         # Apply transform to x
@@ -162,7 +162,7 @@ def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder):
     with torch.no_grad():
         for batch_idx, (inputs, targets) in enumerate((loader)):
             print(inputs.shape, targets.shape)
-            
+
             inputs, targets = inputs.to(device), targets.to(device)
             x = inputs
             outputs = model(x)

@@ -123,6 +123,15 @@ class Phase2Model(nn.Module):
         logits = self.fc(after_ode_feats)
         return before_ode_feats, after_ode_feats, logits
     
+class SingleOutputWrapper(nn.Module): 
+    def __init__(self, model): 
+        super(SingleOutputWrapper, self).__init__()
+        self.model = model 
+
+    def forward(self, x): 
+        _, _, out = self.model(x)
+        return out 
+    
 def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phase2_path: str = None, fc_layer = None):
     import os 
     weight_diag = 10
@@ -189,8 +198,8 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
             torch.cuda.empty_cache()
             
             if itr % batches_per_epoch == 0:
-                tr_res = test_ce(-1, phase2_model, trainloader, device, nn.CrossEntropyLoss(), 110, '')
-                te_res = test_ce(-1, phase2_model, testloader, device, nn.CrossEntropyLoss(), 110, '')
+                tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '')
+                te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '')
                 print('itr = ', itr, 'Train Acc, Loss', tr_res['acc'], tr_res['loss'])
                 print('itr = ', itr, 'Test Acc, Loss', te_res['acc'], te_res['loss'])
                 if itr ==0:

@@ -6,12 +6,24 @@ import torch.nn as nn
 import numpy as np 
 from tqdm import trange
 from torch.utils.data import DataLoader
+import sys 
 
-from utils_bert import get_sst2_feature_dataset, get_bert_fc_layer
+
+from utils_bert import get_sst2_feature_dataset, get_bert_fc_layer, Logger
 from _utils import makedirs
 from _utils import MLP_OUT_ORTH1024, MLP_OUT_BALL_given_mat
 from utils_bert import get_max_row_dist_for_2_classes, check_max_row_dist_matrix, train_ce, test_ce
-    
+
+LOG_PATH = 'testingBertSodef'
+EXP_NAME = 'onos'
+
+makedirs(f'{LOG_PATH}/{EXP_NAME}')
+sys.stdout = Logger("{}/{}/run.log".format(LOG_PATH, EXP_NAME))
+# sys.stderr = sys.stdout
+command_line_args = sys.argv
+command = " ".join(command_line_args)
+print(f"The command that ran this script: {command}")
+
 BERT_CKPT_DIR = '/mnt/data/hossein/Hossein_workspace/nips_cetra/hamed/BERT-PG/training_script/BERT/models/no_trainer/sst2'
 FEATS_DIR = f'{BERT_CKPT_DIR}/saving_feats/{0}_feats.npz'
 CLF_LAYER_DIR = f'{BERT_CKPT_DIR}/bert_clf.pth'
@@ -75,4 +87,4 @@ bert_fc_layer = get_bert_fc_layer(CLF_LAYER_DIR).to(device)
 
 bert_fc_features_sanity_check(bert_fc_layer, train_feature_loader, test_feature_loader, device)
 
-# orth_bridge_layer = phase1(None, None, device, False)
+orth_bridge_layer = phase1(None, None, device, False)

@@ -176,7 +176,7 @@ def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder, save
             'acc': acc,
             'epoch': epoch,
         }
-        torch.save(state, save_folder+'/{save_name}_best_acc_ckpt.pth')
+        torch.save(state, save_folder+f'/{save_name}_best_acc_ckpt.pth')
         best_acc = acc
     
     return {

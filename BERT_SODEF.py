@@ -331,5 +331,7 @@ test_feature_loader = DataLoader(sst2_test_feature_set,
     batch_size=PHASE1_BS,
     shuffle=False, num_workers=2, pin_memory=True
 )
-phase3(odefunc, phase2_model, train_feature_loader, test_feature_loader, save_folder=f'{LOG_PATH}/{EXP_NAME}', fc_layer=phase2_model.fc, loadmodel=None)
+phase3(odefunc, phase2_model, train_feature_loader, test_feature_loader, save_folder=f'{LOG_PATH}/{EXP_NAME}', fc_layer=phase2_model.fc, 
+       loadmodel = f'{LOG_PATH}/{EXP_NAME}/phase3/phase3_best_acc_ckpt.pth',
+       )
 # loadmodel = f'{LOG_PATH}/{EXP_NAME}/phase3/phase3_best_acc_ckpt.pth'

@@ -144,7 +144,7 @@ def train_ce(epoch, model, loader, device, optimizer, criterion):
     }
 
 
-def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder):
+def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder, save_name: str = 'noname'):
     model.eval()
     test_loss = 0
     correct = 0
@@ -172,11 +172,11 @@ def test_ce(epoch, model, loader, device, criterion, best_acc, save_folder):
     if acc > best_acc:
         print(f'Saving at epoch {epoch} with acc {acc} ...')
         state = {
-            'phase1_model': model.state_dict(),
+            f'{save_name}_model': model.state_dict(),
             'acc': acc,
             'epoch': epoch,
         }
-        torch.save(state, save_folder+'/phase1_best_acc_ckpt.pth')
+        torch.save(state, save_folder+'/{save_name}_best_acc_ckpt.pth')
         best_acc = acc
     
     return {

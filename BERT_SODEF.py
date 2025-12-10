@@ -7,11 +7,11 @@ import numpy as np
 from tqdm import trange
 from torch.utils.data import DataLoader
 import sys 
-
+import os 
 
 from utils_bert import get_sst2_feature_dataset, get_bert_fc_layer, Logger
 from _utils import makedirs
-from _utils import MLP_OUT_ORTH_X_X, MLP_OUT_BALL_given_mat
+from _utils import MLP_OUT_ORTH_X_X, MLP_OUT_BALL_given_mat, ODEBlock, MLP_OUT_LINEAR
 from utils_bert import get_max_row_dist_for_2_classes, check_max_row_dist_matrix, train_ce, test_ce, set_seed_reproducability
 
 LOG_PATH = 'testingBertSodef'
@@ -35,8 +35,8 @@ device = 'cpu' if not torch.cuda.is_available() else torch.device('cuda:0')
 set_seed_reproducability(SEED)
 
 def bert_fc_features_sanity_check(bert_clf_layer, trainloader, testloader, device): 
-    tr_res = test_ce(-1, bert_clf_layer, trainloader, device, nn.CrossEntropyLoss(), 110, '')
-    te_res = test_ce(-1, bert_clf_layer, testloader, device, nn.CrossEntropyLoss(), 110, '')
+    tr_res = test_ce(-1, bert_clf_layer, trainloader, device, nn.CrossEntropyLoss(), 110, '', save_name='bert_fc_sanity_check_train')
+    te_res = test_ce(-1, bert_clf_layer, testloader, device, nn.CrossEntropyLoss(), 110, '', save_name='bert_fc_sanity_check_test')
 
     print('Train Acc, Loss', tr_res['acc'], tr_res['loss'])
     print('Test Acc, Loss', te_res['acc'], te_res['loss'])
@@ -65,7 +65,7 @@ def phase1(trainloader, testloader, device, load_phase1: bool = False, base_fold
         for epoch in trange(0, n_epochs):
             tr_results = train_ce(epoch, phase1_model, trainloader, device, optimizer, criterion)
             print('tr_acc, tr_loss', tr_results['acc'], tr_results['loss'])
-            te_results = test_ce(epoch, phase1_model, testloader, device, criterion, best_acc, phase1_save_folder)
+            te_results = test_ce(epoch, phase1_model, testloader, device, criterion, best_acc, phase1_save_folder, save_name='phase1')
             best_acc = te_results['best_acc']
             print('te_acc, te_loss', te_results['acc'], te_results['loss'])
             
@@ -200,8 +200,8 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
             torch.cuda.empty_cache()
             
             if itr % batches_per_epoch == 0:
-                tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '')
-                te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '')
+                tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '', save_name='phase2_logging_train')
+                te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '', save_name='phase2_logging_test')
                 print('itr = ', itr, 'Train Acc, Loss', tr_res['acc'], tr_res['loss'])
                 print('itr = ', itr, 'Test Acc, Loss', te_res['acc'], te_res['loss'])
                 if itr ==0:
@@ -226,8 +226,8 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
         saved_temp = torch.load(load_phase2_path)['state_dict']
         phase2_model.load_state_dict(saved_temp)
         print('Sanity check phase2: ')
-        tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '')
-        te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '')
+        tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '', save_name='phase2_logging_train')
+        te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '', save_name='phase2_logging_test')
         print('Train Acc, Loss', tr_res['acc'], tr_res['loss'])
         print('Test Acc, Loss', te_res['acc'], te_res['loss'])
         return phase2_model, phase2_model.ode_block.odefunc
@@ -249,3 +249,87 @@ phase2_model, odefunc = phase2(
     fc_layer=list(phase1_model)[1],
     load_phase2_path = f'{LOG_PATH}/{EXP_NAME}/phase2model_19.pth',
 )
+
+class Phase3Model(nn.Module): 
+    def __init__(self, bridge_768_64, ode_block, fc): 
+        super(Phase3Model, self).__init__()
+        self.bridge_768_64 = bridge_768_64
+        self.ode_block = ode_block
+        self.fc = fc
+
+    def set_all_req_grads(self, value=True):
+        for name, param in self.named_parameters():
+            param.requires_grad = True
+            
+    def freeze_layer_given_name(self, layer_names): 
+        if isinstance(layer_names, str):
+            layer_names = [layer_names]
+
+        for target in layer_names:
+            if target in self._modules:   # only top-level modules
+                module = self._modules[target]
+                for param in module.parameters():
+                    param.requires_grad = False
+
+        for name, param in self.named_parameters():
+            if param.requires_grad == True: 
+                print(f"[TRAINABLE] {name}")
+            else:
+                print(f"[FROZEN] {name}")
+    
+    def forward(self, x): 
+        before_ode_feats = self.bridge_768_64(x)
+        after_ode_feats = self.ode_block(before_ode_feats)
+        logits = self.fc(after_ode_feats)
+        return logits
+    
+def phase3(odefunc, prev_phase2model, trainloader, testloader, save_folder: str, fc_layer = None, loadmodel=None):
+
+    ODE_FC_fc_epoch = 10
+
+    ODE_layer = ODEBlock(odefunc=odefunc)
+    
+    use_fc_from_prev_phase = not fc_layer is None
+    print('use_fc_from_prev_phase', use_fc_from_prev_phase)
+    phase3model = Phase3Model(prev_phase2model.bridge_768_64, ode_block=ODE_layer, fc = MLP_OUT_LINEAR(64, 2) if not use_fc_from_prev_phase else fc_layer)
+    phase3model.set_all_req_grads(True)
+    phase3model.freeze_layer_given_name(['bridge_768_64'])
+
+    optimizer = torch.optim.Adam([{'params': phase3model.ode_block.odefunc.parameters(), 'lr': 1e-5, 'eps':1e-6,},
+                                {'params': phase3model.fc.parameters(), 'lr': 1e-2, 'eps':1e-4,}], amsgrad=True)
+    criterion = nn.CrossEntropyLoss()
+
+    if loadmodel is None: 
+        best_acc = 0 
+        for epoch in range(0, ODE_FC_fc_epoch):
+            tr_results = train_ce(epoch, phase3model, trainloader, device, optimizer, criterion)
+            te_results = test_ce(epoch, phase3model, testloader, device, criterion, best_acc, save_folder=save_folder, save_name='phase3')
+            best_acc = te_results['best_acc']
+            print('tr_acc, tr_loss', tr_results['acc'], tr_results['loss'])
+            print('te_acc, te_loss', te_results['acc'], te_results['loss'])
+    else:
+        
+        print('Loading ', loadmodel)
+        saved_temp = torch.load(loadmodel)
+        statedic_temp = saved_temp['phase3_model']
+        phase3model.load_state_dict(statedic_temp)
+
+        print('Sanity check phase3: ')
+        tr_res = test_ce(-1, phase3model, trainloader, device, nn.CrossEntropyLoss(), 110, '', save_name='phase3_logging_train')
+        te_res = test_ce(-1, phase3model, testloader, device, nn.CrossEntropyLoss(), 110, '', save_name='phase3_logging_test')
+        print('Train Acc, Loss', tr_res['acc'], tr_res['loss'])
+        print('Test Acc, Loss', te_res['acc'], te_res['loss'])
+        
+
+    return phase3model
+
+train_feature_loader = DataLoader(sst2_train_feature_set,
+    batch_size=PHASE1_BS,
+    shuffle=True, num_workers=2, pin_memory=True
+)
+test_feature_loader = DataLoader(sst2_test_feature_set,
+    batch_size=PHASE1_BS,
+    shuffle=False, num_workers=2, pin_memory=True
+)
+phase3(odefunc, phase2_model, train_feature_loader, test_feature_loader, save_folder={LOG_PATH}/{EXP_NAME}, fc_layer=phase2_model.fc, loadmodel=None)
+# loadmodel = f'{LOG_PATH}/{EXP_NAME}/phase3/phase3_best_acc_ckpt.pth'

@@ -228,8 +228,8 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
         print('Sanity check phase2: ')
         tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '')
         te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '')
-        print('itr = ', itr, 'Train Acc, Loss', tr_res['acc'], tr_res['loss'])
-        print('itr = ', itr, 'Test Acc, Loss', te_res['acc'], te_res['loss'])
+        print('Train Acc, Loss', tr_res['acc'], tr_res['loss'])
+        print('Test Acc, Loss', te_res['acc'], te_res['loss'])
         return phase2_model, phase2_model.ode_block.odefunc
 
 train_feature_loader = DataLoader(sst2_train_feature_set,

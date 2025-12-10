@@ -171,7 +171,7 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
 
     optimizer = torch.optim.Adam(phase2_model.parameters(), lr=1e-2, eps=1e-3, amsgrad=True)
     print(ODE_FC_ode_epoch * batches_per_epoch)
-    exit()
+
     if load_phase2_path is None: 
         for itr in range(ODE_FC_ode_epoch * batches_per_epoch):
 
@@ -220,11 +220,17 @@ def phase2(bridge_768_64, trainloader, testloader, ODE_FC_save_folder, load_phas
                         temp2(odefunc, y00, text_file, odefunc=odefunc, time_df=time_df, device=device, exponent_f=exponent_f)
 
                         text_file.close()
+        return phase2_model, odefunc
     else: 
+        print('Loading ', load_phase2_path)
         saved_temp = torch.load(load_phase2_path)['state_dict']
         phase2_model.load_state_dict(saved_temp)
-
-    return phase2_model, odefunc
+        print('Sanity check phase2: ')
+        tr_res = test_ce(-1, SingleOutputWrapper(phase2_model), trainloader, device, nn.CrossEntropyLoss(), 110, '')
+        te_res = test_ce(-1, SingleOutputWrapper(phase2_model), testloader, device, nn.CrossEntropyLoss(), 110, '')
+        print('itr = ', itr, 'Train Acc, Loss', tr_res['acc'], tr_res['loss'])
+        print('itr = ', itr, 'Test Acc, Loss', te_res['acc'], te_res['loss'])
+        return phase2_model, phase2_model.ode_block.odefunc
 
 train_feature_loader = DataLoader(sst2_train_feature_set,
     batch_size=PHASE2_BS,
@@ -240,6 +246,6 @@ phase2_model, odefunc = phase2(
     trainloader=train_feature_loader,
     testloader=test_feature_loader, 
     ODE_FC_save_folder=f'{LOG_PATH}/{EXP_NAME}',
-    load_phase2_path = None,
     fc_layer=list(phase1_model)[1],
+    load_phase2_path = f'{LOG_PATH}/{EXP_NAME}/phase2model_19.pth',
 )

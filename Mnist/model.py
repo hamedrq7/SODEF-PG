@@ -113,7 +113,7 @@ class MLP_OUT_LINEAR(nn.Module):
 
 
     
-fc_max = 'Mnist\64_10_ckpt.pth'
+fc_max = 'Mnist/64_10_ckpt.pth'
 saved_temp = torch.load(fc_max)
 matrix_temp = saved_temp['matrix']
 print(matrix_temp.shape)

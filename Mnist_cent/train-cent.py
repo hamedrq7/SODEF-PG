@@ -24,20 +24,23 @@ from model import *
 
 cent_weight = 0.001
 cent_lr = 0.0
+rad = 20
+exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
 do_wandb = True
 if do_wandb:
-    wandb.init(project="SODEF-MNIST", name=f'MNIST-64D-CenterLoss-FCinit_cent_weight_{cent_weight}-centlr_{cent_lr}_rad20')
+    wandb.init(project="SODEF-MNIST", name=f'MNIST-64D-CenterLoss-FCinit_cent_weight_{exp_name}')
 
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-train_savepath = './data_cent_init/orth_MNIST_train_resnet_final.npz'
-test_savepath = './data_cent_init/orth_MNIST_test_resnet_final.npz'
-os.makedirs('./data_cent_init', exist_ok=True)
+base_data_path = f'./data_cent_init_{exp_name}'
+train_savepath = f'{base_data_path}/orth_MNIST_train_resnet_final.npz'
+test_savepath = f'{base_data_path}/orth_MNIST_test_resnet_final.npz'
+os.makedirs(base_data_path, exist_ok=True)
 
 fc_dim = 64
-folder_savemodel = './EXP/orth_MNIST_resnet_final_cent_init'
-
+folder_savemodel = f'./EXP/orth_MNIST_resnet_final_{exp_name}'
+os.makedirs(folder_savemodel, exist_ok=True)
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', default=128, type=int)
@@ -516,7 +519,7 @@ class DensemnistDatasetTest(Dataset):
 
         return x, y
 
-odesavefolder = './EXP/orth_dense_resnet_final_cent_init'
+odesavefolder = f'./EXP/orth_dense_resnet_final_{exp_name}'
 makedirs(odesavefolder)
 odefunc = ODEfunc_mlp(0)
 
@@ -649,13 +652,13 @@ endtime = 5
 layernum = 0
 
 # [X]
-folder = './EXP/orth_dense_resnet_final_cent_init/model_39.pth'
+folder = f'./EXP/orth_dense_resnet_final_{exp_name}/model_39.pth'
 saved = torch.load(folder)
 print('load...', folder)
 statedic = saved['state_dict']
 args = saved['args']
 tol = 1e-5
-savefolder_fc = './EXP/orth_resnetfct5_15_cent_init/'
+savefolder_fc = f'./EXP/orth_resnetfct5_15_cent_{exp_name}/'
 print('saving...', savefolder_fc, ' endtime... ',endtime)
 
 

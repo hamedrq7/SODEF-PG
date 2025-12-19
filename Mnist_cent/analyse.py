@@ -305,7 +305,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
                 denoised_test_acc += (denoised_output.argmax(1) == y).sum().item()
 
                 n += y.size(0)
-                break
 
         loss_diffs = torch.cat(loss_diffs, dim=0)  # shape (N,)
 
@@ -406,7 +405,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
                 denoised_pgd_acc += (denoised_output.argmax(1) == y).sum().item()
 
                 n += y.size(0)
-            break 
 
         loss_diffs = torch.cat(loss_diffs, dim=0)
 

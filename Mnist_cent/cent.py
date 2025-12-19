@@ -190,7 +190,7 @@ class CenterLossNormal(nn.Module):
         num_classes (int): number of classes.
         feat_dim (int): feature dimension.
     """
-    def __init__(self, num_classes=10, feat_dim=64, use_gpu=True, init_value = None):
+    def __init__(self, num_classes=10, feat_dim=64, use_gpu=True, init_value = None, rad = 1.0):
         super(CenterLossNormal, self).__init__()
         self.num_classes = num_classes
         self.feat_dim = feat_dim
@@ -198,12 +198,12 @@ class CenterLossNormal(nn.Module):
         self.init_value = init_value
 
         if self.use_gpu:
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim).cuda())
+            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim).cuda()) * rad
         else:
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
+            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))* rad
 
         if self.init_value is not None: 
-            self.centers.data = init_value
+            self.centers.data = init_value 
         
     def forward(self, x, labels):
         """

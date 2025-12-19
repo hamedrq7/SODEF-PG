@@ -209,11 +209,12 @@ def train(epoch):
 
         for l in modulelist[0:6]:
             x = l(x)
-        feats = net[6](x[..., 0, 0])
+        x = net[6](x[..., 0, 0])
         
-        cent_loss = centers(feats, targets)
-        outputs = net[7](feats)
-
+        cent_loss = centers(x, targets)
+        x = net[7](x)
+        outputs = x 
+        
         loss = criterion(outputs, targets) + cent_weight * cent_loss
         loss.backward()
         optimizer.step()

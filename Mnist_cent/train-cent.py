@@ -33,6 +33,7 @@ if do_wandb:
 
 train_savepath = './data_cent_init/orth_MNIST_train_resnet_final.npz'
 test_savepath = './data_cent_init/orth_MNIST_test_resnet_final.npz'
+os.makedirs('./data_cent_init', exist_ok=True)
 
 fc_dim = 64
 folder_savemodel = './EXP/orth_MNIST_resnet_final_cent_init'

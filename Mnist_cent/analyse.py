@@ -179,9 +179,13 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
             self.odefunc = odefunc
             self.integration_time = torch.tensor([0, endtime]).float()
 
-        def forward(self, x):
+        def forward(self, x, t = None):
             self.integration_time = self.integration_time.type_as(x)
-            out = odeint(self.odefunc, x, self.integration_time, rtol=tol, atol=tol)
+            if t is None: 
+                out = odeint(self.odefunc, x, self.integration_time, rtol=tol, atol=tol)
+            else: 
+                integration_time = torch.tensor([0, t]).float().type_as(x)
+                out = odeint(self.odefunc, x, integration_time, rtol=tol, atol=tol)
             return out[1]
 
         @property

@@ -651,10 +651,10 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
 
         return centers
 
-    num_classes = 10
-    stable_points = extract_stable_points_per_class(
-        zT, labels, num_classes
-    )
+    # num_classes = 10
+    # stable_points = extract_stable_points_per_class(
+    #     zT, labels, num_classes
+    # )
 
     # print(estimate_basin_stats_relative(combined_model, stable_points))
     table.add_data(exp_name, raw_test_loss, denoised_test_loss, raw_test_acc, denoised_test_acc, no_ode_raw_test_loss, no_ode_denoised_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_acc, w_ode_raw_test_loss, w_ode_denoised_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_acc)

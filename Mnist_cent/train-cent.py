@@ -27,9 +27,9 @@ cent_lr = 0.001
 rad = 1.0
 exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
 do_wandb = True
-device = torch.device("cuda:0")
-# torch.cuda.set_device(1)
-# device = torch.device("cuda:1")
+# device = torch.device("cuda:0")
+torch.cuda.set_device(1)
+device = torch.device("cuda:1")
 best_acc = 0
 start_epoch = 0
 

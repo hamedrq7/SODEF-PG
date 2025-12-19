@@ -188,7 +188,7 @@ print(net)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam([{'params': net.parameters(), 'lr': 0.0001, 'eps':1e-4,},
-                            {'params': centers.parameters(), 'lr': cent_lr, 'eps':1e-4,}], amsgrad=True)
+                            {'params': centers.parameters(), 'lr': cent_lr, 'eps':1e-4,}], weight_decay=0.0005, amsgrad=True)
 
 
 def save_training_feature(model, dataset_loader):

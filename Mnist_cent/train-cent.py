@@ -146,7 +146,7 @@ for param in fc_layers.parameters():
 net = nn.Sequential(*net, fcs_temp, fc_layers).to(device)
 from cent import CenterLossNormal
 # centers = CenterLossNormal(10, feat_dim=64, use_gpu=True, init_value=fc_layers.fc0.weight.detach().clone()* 20.0)
-centers = CenterLossNormal(10, feat_dim=64, init_value=fc_layers.fc0.weight.detach().clone()* 20.0)
+centers = CenterLossNormal(10, feat_dim=64, init_value=fc_layers.fc0.weight.detach().clone()* rad)
 centers = centers.to(device)
 
 print(net)

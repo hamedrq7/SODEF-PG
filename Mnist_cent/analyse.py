@@ -668,3 +668,16 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     wandb.summary[f"{exp_name} w_ode_denoised_test_loss"] = w_ode_denoised_test_loss
     wandb.summary[f"{exp_name} w_ode_raw_test_acc"] = w_ode_raw_test_acc
     wandb.summary[f"{exp_name} w_ode_denoised_test_acc"] = w_ode_denoised_test_acc
+
+    print('raw_test_loss', raw_test_loss)
+    print('denoised_test_loss', denoised_test_loss)
+    print('raw_test_acc', raw_test_acc)
+    print('denoised_test_acc', denoised_test_acc)
+    print('no_ode_raw_test_loss', no_ode_raw_test_loss)
+    print('no_ode_denoised_test_loss', no_ode_denoised_test_loss)
+    print('no_ode_raw_test_acc', no_ode_raw_test_acc)
+    print('no_ode_denoised_test_acc', no_ode_denoised_test_acc)
+    print('w_ode_raw_test_loss', w_ode_raw_test_loss)
+    print('w_ode_denoised_test_loss', w_ode_denoised_test_loss)
+    print('w_ode_raw_test_acc', w_ode_raw_test_acc)
+    print('w_ode_denoised_test_acc', w_ode_denoised_test_acc)

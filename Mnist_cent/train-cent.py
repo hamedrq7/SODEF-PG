@@ -29,7 +29,7 @@ if do_wandb:
     wandb.init(project="SODEF-MNIST", name=f'MNIST-64D-CenterLoss-FCinit_cent_weight_{cent_weight}-centlr_{cent_lr}_rad20')
 
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 train_savepath = './data_cent_init/orth_MNIST_train_resnet_final.npz'
 test_savepath = './data_cent_init/orth_MNIST_test_resnet_final.npz'

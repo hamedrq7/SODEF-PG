@@ -28,7 +28,7 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     cent_weight = exp[0]
     cent_lr = exp[1]
     rad = exp[2]
-    exp_name = f'anls-cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
+    exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
     do_wandb = True
     # device = torch.device("cuda:0")
     torch.cuda.set_device(1)
@@ -37,7 +37,7 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     start_epoch = 0
 
     if do_wandb:
-        wandb.init(project="SODEF-MNIST", name=f'MNIST-64D-CenterLoss-FCinit_cent_weight_{exp_name}')
+        wandb.init(project="SODEF-MNIST", name=f'anls-MNIST-64D-CenterLoss-FCinit_cent_weight_{exp_name}')
 
     # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     # os.environ["CUDA_VISIBLE_DEVICES"] = "1"

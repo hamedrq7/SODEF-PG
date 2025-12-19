@@ -37,7 +37,7 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     start_epoch = 0
 
     if do_wandb:
-        wandb.init(project="SODEF-MNIST", name=f'anls-MNIST-64D-CenterLoss-FCinit_cent_weight_{exp_name}')
+        wandb.init(project="SODEF-MNIST", name=f'anls-MNIST-64D-CenterLoss-FCinit_cent_weight')
 
     # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -421,10 +421,11 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     raw_test_loss, raw_test_acc, denoised_test_loss, denoised_test_acc, loss_diffs_clean = evaluate_standard(testloader, combined_model)
 
     if do_wandb:
-        wandb.log({"raw_test_loss": raw_test_loss,
-                "raw_test_acc": raw_test_acc, 
-                "denoised_test_loss": denoised_test_loss, 
-                "denoised_test_acc": denoised_test_acc, 
+        wandb.log({
+                f"{exp_name} raw_test_loss": raw_test_loss,
+                f"{exp_name} raw_test_acc": raw_test_acc, 
+                f"{exp_name} denoised_test_loss": denoised_test_loss, 
+                f"{exp_name} denoised_test_acc": denoised_test_acc, 
                 })
 
 
@@ -498,7 +499,7 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
 
         plt.tight_layout()
         if do_wandb:             
-            wandb.log({f"{save_path}": wandb.Image(plt)})
+            wandb.log({f"{exp_name} {save_path}": wandb.Image(plt)})
 
         plt.savefig(save_path, dpi=300)
         plt.clf()
@@ -514,10 +515,11 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     no_ode_raw_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_loss, no_ode_denoised_test_acc, loss_diffs_pgd_w_ode = evaluate_pgd(testloader, combined_model, no_ode_in_pgd_generation=False)
 
     if do_wandb:
-        wandb.log({"no_ode_raw_test_loss": no_ode_raw_test_loss,
-                "no_ode_raw_test_acc": no_ode_raw_test_acc, 
-                "no_ode_denoised_test_loss": no_ode_denoised_test_loss, 
-                "no_ode_denoised_test_acc": no_ode_denoised_test_acc, 
+        wandb.log({
+                f"{exp_name} no_ode_raw_test_loss": no_ode_raw_test_loss,
+                f"{exp_name} no_ode_raw_test_acc": no_ode_raw_test_acc, 
+                f"{exp_name} no_ode_denoised_test_loss": no_ode_denoised_test_loss, 
+                f"{exp_name} no_ode_denoised_test_acc": no_ode_denoised_test_acc, 
                 })
 
     plot_loss_diff_histogram_trimmed(
@@ -530,10 +532,11 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     w_ode_raw_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_loss, w_ode_denoised_test_acc, loss_diffs_pgd_w_o_ode = evaluate_pgd(testloader, combined_model, no_ode_in_pgd_generation=True)
 
     if do_wandb:
-        wandb.log({"w_ode_raw_test_loss": w_ode_raw_test_loss,
-                "w_ode_raw_test_acc": w_ode_raw_test_acc, 
-                "w_ode_denoised_test_loss": w_ode_denoised_test_loss, 
-                "w_ode_denoised_test_acc": w_ode_denoised_test_acc, 
+        wandb.log({
+                f"{exp_name} w_ode_raw_test_loss": w_ode_raw_test_loss,
+                f"{exp_name} w_ode_raw_test_acc": w_ode_raw_test_acc, 
+                f"{exp_name} w_ode_denoised_test_loss": w_ode_denoised_test_loss, 
+                f"{exp_name} w_ode_denoised_test_acc": w_ode_denoised_test_acc, 
                 })
 
 

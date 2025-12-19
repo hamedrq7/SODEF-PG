@@ -27,6 +27,11 @@ cent_lr = 0.0
 rad = 20
 exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
 do_wandb = True
+torch.cuda.set_device(1)
+device = torch.device("cuda:1")
+best_acc = 0
+start_epoch = 0
+
 if do_wandb:
     wandb.init(project="SODEF-MNIST", name=f'MNIST-64D-CenterLoss-FCinit_cent_weight_{exp_name}')
 
@@ -71,10 +76,7 @@ def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-torch.cuda.set_device(1)
-device = torch.device("cuda:1")
-best_acc = 0
-start_epoch = 0
+
 
 
 

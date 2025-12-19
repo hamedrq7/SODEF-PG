@@ -18,9 +18,9 @@ import os
 import argparse
 from torchdiffeq import odeint_adjoint as odeint
 from torch.utils.data import Dataset, DataLoader
-from Mnist.models import *
+from Mnist_cent.models import *
 import wandb
-from Mnist.model import * 
+from Mnist_cent.model import * 
 
 cent_weight = 0.001
 cent_lr = 0.0

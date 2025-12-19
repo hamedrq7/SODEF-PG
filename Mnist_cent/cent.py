@@ -243,7 +243,7 @@ class CenterLossNormal(nn.Module):
         self.feat_dim = feat_dim
         self.size_average = size_average
 
-    def forward(self, label, feat):
+    def forward(self, feat, label):
         batch_size = feat.size(0)
         feat = feat.view(batch_size, -1)
         # To check the dim of centers and features

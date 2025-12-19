@@ -203,7 +203,8 @@ class CenterLossNormal(nn.Module):
             self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))* rad
 
         if self.init_value is not None: 
-            self.centers.data.copy_(init_value)
+            # self.centers.data.copy_(init_value)
+            self.centers.data = init_value
             
     def forward(self, x, labels):
         """

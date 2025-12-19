@@ -23,8 +23,8 @@ import wandb
 from model import * 
 
 cent_weight = 0.001
-cent_lr = 0.0
-rad = 20
+cent_lr = 0.001
+rad = 1.0
 exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
 do_wandb = True
 torch.cuda.set_device(1)

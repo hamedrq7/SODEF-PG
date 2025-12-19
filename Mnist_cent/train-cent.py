@@ -100,17 +100,17 @@ def get_mnist_loaders(data_aug=False, batch_size=128, test_batch_size=1000, perc
 
     train_loader = DataLoader(
         datasets.MNIST(root='.data/mnist', train=True, download=True, transform=transform_train), batch_size=batch_size,
-        shuffle=True, num_workers=1, drop_last=True
+        shuffle=True, num_workers=4, drop_last=True, pin_memory=True
     )
 
     train_eval_loader = DataLoader(
         datasets.MNIST(root='.data/mnist', train=True, download=True, transform=transform_test),
-        batch_size=batch_size, shuffle=False, num_workers=1, drop_last=True
+        batch_size=batch_size, shuffle=False, num_workers=4, drop_last=True, pin_memory=True
     )
 
     test_loader = DataLoader(
         datasets.MNIST(root='.data/mnist', train=False, download=True, transform=transform_test),
-        batch_size=batch_size, shuffle=False, num_workers=1, drop_last=True
+        batch_size=batch_size, shuffle=False, num_workers=4, drop_last=True, pin_memory=True
     )
 
     return train_loader, test_loader, train_eval_loader
@@ -532,16 +532,16 @@ regularizer = nn.MSELoss()
 
 train_loader = DataLoader(DensemnistDatasetTrain(),
                           batch_size=32,
-                          shuffle=True, num_workers=1
+                          shuffle=True, num_workers=4, pin_memory=True
                           )
 train_loader__ = DataLoader(DensemnistDatasetTrain(),
                             batch_size=32,
-                            shuffle=True, num_workers=1
+                            shuffle=True, num_workers=4, pin_memory=True
                             )
 
 test_loader = DataLoader(DensemnistDatasetTest(),
                          batch_size=32,
-                         shuffle=True, num_workers=1
+                         shuffle=True, num_workers=4, pin_memory=True
                          )
 
 data_gen = inf_generator(train_loader)

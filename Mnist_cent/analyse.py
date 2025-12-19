@@ -22,22 +22,24 @@ from models import *
 import wandb
 from model import * 
 
+do_wandb = True
+if do_wandb:
+    wandb.init(project="SODEF-MNIST", name=f'anls-MNIST-64D-CenterLoss-FCinit_cent_weight')
 
+table = wandb.Table(columns=["experiment", "raw_test_loss", "denoised_test_loss", "raw_test_acc", "denoised_test_acc", "no_ode_raw_test_loss", "no_ode_denoised_test_loss", "no_ode_raw_test_acc", "no_ode_denoised_test_acc", "w_ode_raw_test_loss", "w_ode_denoised_test_loss", "w_ode_raw_test_acc", "w_ode_denoised_test_acc"])
 
 for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     cent_weight = exp[0]
     cent_lr = exp[1]
     rad = exp[2]
     exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
-    do_wandb = True
     # device = torch.device("cuda:0")
     torch.cuda.set_device(1)
     device = torch.device("cuda:1")
     best_acc = 0
     start_epoch = 0
+    print(exp_name)
 
-    if do_wandb:
-        wandb.init(project="SODEF-MNIST", name=f'anls-MNIST-64D-CenterLoss-FCinit_cent_weight')
 
     # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -222,7 +224,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     model2 = nn.Sequential(*feature_layers, *fc_layers).to(device)
     model2.load_state_dict(statedict3) # [X]
 
-    print(model2)
 
 
     import torch.nn as nn
@@ -420,13 +421,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     # Clean acc 
     raw_test_loss, raw_test_acc, denoised_test_loss, denoised_test_acc, loss_diffs_clean = evaluate_standard(testloader, combined_model)
 
-    if do_wandb:
-        wandb.log({
-                f"{exp_name} raw_test_loss": raw_test_loss,
-                f"{exp_name} raw_test_acc": raw_test_acc, 
-                f"{exp_name} denoised_test_loss": denoised_test_loss, 
-                f"{exp_name} denoised_test_acc": denoised_test_acc, 
-                })
 
 
     import numpy as np
@@ -514,13 +508,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     # PGD generation w/ODE
     no_ode_raw_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_loss, no_ode_denoised_test_acc, loss_diffs_pgd_w_ode = evaluate_pgd(testloader, combined_model, no_ode_in_pgd_generation=False)
 
-    if do_wandb:
-        wandb.log({
-                f"{exp_name} no_ode_raw_test_loss": no_ode_raw_test_loss,
-                f"{exp_name} no_ode_raw_test_acc": no_ode_raw_test_acc, 
-                f"{exp_name} no_ode_denoised_test_loss": no_ode_denoised_test_loss, 
-                f"{exp_name} no_ode_denoised_test_acc": no_ode_denoised_test_acc, 
-                })
 
     plot_loss_diff_histogram_trimmed(
         loss_diffs_pgd_w_ode,
@@ -530,14 +517,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
 
     # PGD generation w.o./ODE
     w_ode_raw_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_loss, w_ode_denoised_test_acc, loss_diffs_pgd_w_o_ode = evaluate_pgd(testloader, combined_model, no_ode_in_pgd_generation=True)
-
-    if do_wandb:
-        wandb.log({
-                f"{exp_name} w_ode_raw_test_loss": w_ode_raw_test_loss,
-                f"{exp_name} w_ode_raw_test_acc": w_ode_raw_test_acc, 
-                f"{exp_name} w_ode_denoised_test_loss": w_ode_denoised_test_loss, 
-                f"{exp_name} w_ode_denoised_test_acc": w_ode_denoised_test_acc, 
-                })
 
 
     plot_loss_diff_histogram_trimmed(
@@ -585,7 +564,6 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
                         z0 = (z_star + delta).unsqueeze(0)
 
                         z1 = model.ode_block(z0, t=T_test).squeeze(0)
-                        print(torch.norm(z1 - z_star))
                         if not use_settle_test:
                             thresh = beta * norm_star
                             ok = (torch.norm(z1 - z_star) <= thresh)
@@ -679,3 +657,4 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     )
 
     print(estimate_basin_stats_relative(combined_model, stable_points))
+    table.add_data(exp_name, raw_test_loss, denoised_test_loss, raw_test_acc, denoised_test_acc, no_ode_raw_test_loss, no_ode_denoised_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_acc, w_ode_raw_test_loss, w_ode_denoised_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_acc)

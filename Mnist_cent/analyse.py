@@ -26,8 +26,6 @@ do_wandb = True
 if do_wandb:
     wandb.init(project="SODEF-MNIST", name=f'anls-MNIST-64D-CenterLoss-FCinit_cent_weight')
 
-table = wandb.Table(columns=["experiment", "raw_test_loss", "denoised_test_loss", "raw_test_acc", "denoised_test_acc", "no_ode_raw_test_loss", "no_ode_denoised_test_loss", "no_ode_raw_test_acc", "no_ode_denoised_test_acc", "w_ode_raw_test_loss", "w_ode_denoised_test_loss", "w_ode_raw_test_acc", "w_ode_denoised_test_acc"])
-
 for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     cent_weight = exp[0]
     cent_lr = exp[1]
@@ -659,14 +657,16 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
     # )
 
     # print(estimate_basin_stats_relative(combined_model, stable_points))
-    table.add_data(exp_name, raw_test_loss, denoised_test_loss, raw_test_acc, denoised_test_acc, no_ode_raw_test_loss, no_ode_denoised_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_acc, w_ode_raw_test_loss, w_ode_denoised_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_acc)
 
-wandb.log({
-    "ABC_by_experiment": table,
-    "ABC_barplot": wandb.plot.bar(
-        table,
-        "experiment",
-        ["raw_test_loss", "denoised_test_loss", "raw_test_acc", "denoised_test_acc", "no_ode_raw_test_loss", "no_ode_denoised_test_loss", "no_ode_raw_test_acc", "no_ode_denoised_test_acc", "w_ode_raw_test_loss", "w_ode_denoised_test_loss", "w_ode_raw_test_acc", "w_ode_denoised_test_acc"],
-        title="A / B / C per Experiment"
-    )
-})
+    wandb.summary[f"{exp_name} raw_test_loss"] = raw_test_loss
+    wandb.summary[f"{exp_name} denoised_test_loss"] = denoised_test_loss
+    wandb.summary[f"{exp_name} raw_test_acc"] = raw_test_acc
+    wandb.summary[f"{exp_name} denoised_test_acc"] = denoised_test_acc
+    wandb.summary[f"{exp_name} no_ode_raw_test_loss"] = no_ode_raw_test_loss
+    wandb.summary[f"{exp_name} no_ode_denoised_test_loss"] = no_ode_denoised_test_loss
+    wandb.summary[f"{exp_name} no_ode_raw_test_acc"] = no_ode_raw_test_acc
+    wandb.summary[f"{exp_name} no_ode_denoised_test_acc"] = no_ode_denoised_test_acc
+    wandb.summary[f"{exp_name} w_ode_raw_test_loss"] = w_ode_raw_test_loss
+    wandb.summary[f"{exp_name} w_ode_denoised_test_loss"] = w_ode_denoised_test_loss
+    wandb.summary[f"{exp_name} w_ode_raw_test_acc"] = w_ode_raw_test_acc
+    wandb.summary[f"{exp_name} w_ode_denoised_test_acc"] = w_ode_denoised_test_acc

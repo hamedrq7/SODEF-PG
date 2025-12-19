@@ -605,7 +605,7 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
 
         return feats_before_all, feats_after_all, labels_all
 
-    feats_before, feats_after, labels = collect_feats(testloader, combined_model)
+    # feats_before, feats_after, labels = collect_feats(testloader, combined_model)
 
     @torch.no_grad()
     def integrate_to_long_T(model, z0, T_long):
@@ -613,8 +613,8 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
         z0: (N, d)
         """
         return model.ode_block(z0, t=T_long)
-    T_long = 20.0
-    zT = integrate_to_long_T(combined_model, feats_before, T_long)
+    # T_long = 20.0
+    # zT = integrate_to_long_T(combined_model, feats_before, T_long)
 
     from sklearn.cluster import KMeans
 
@@ -656,5 +656,15 @@ for exp in [[0.001, 0.001, 1.0], [0.001, 0.0, 20.0], [0.001, 0.0, 1.0]]:
         zT, labels, num_classes
     )
 
-    print(estimate_basin_stats_relative(combined_model, stable_points))
+    # print(estimate_basin_stats_relative(combined_model, stable_points))
     table.add_data(exp_name, raw_test_loss, denoised_test_loss, raw_test_acc, denoised_test_acc, no_ode_raw_test_loss, no_ode_denoised_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_acc, w_ode_raw_test_loss, w_ode_denoised_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_acc)
+
+wandb.log({
+    "ABC_by_experiment": table,
+    "ABC_barplot": wandb.plot.bar(
+        table,
+        x="experiment",
+        y=["raw_test_loss", "denoised_test_loss", "raw_test_acc", "denoised_test_acc", "no_ode_raw_test_loss", "no_ode_denoised_test_loss", "no_ode_raw_test_acc", "no_ode_denoised_test_acc", "w_ode_raw_test_loss", "w_ode_denoised_test_loss", "w_ode_raw_test_acc", "w_ode_denoised_test_acc"],
+        title="A / B / C per Experiment"
+    )
+})

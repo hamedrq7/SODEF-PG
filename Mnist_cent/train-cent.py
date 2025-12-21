@@ -22,7 +22,7 @@ from models import *
 import wandb
 from model import * 
 
-cent_weight = 0.001
+cent_weight = 0.01
 cent_lr = 0.0
 rad = 20.0
 exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}_no_bias'

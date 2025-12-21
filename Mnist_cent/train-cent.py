@@ -672,9 +672,13 @@ class ODEBlock(nn.Module):
         self.odefunc = odefunc
         self.integration_time = torch.tensor([0, endtime]).float()
 
-    def forward(self, x):
+    def forward(self, x, t = None):
         self.integration_time = self.integration_time.type_as(x)
-        out = odeint(self.odefunc, x, self.integration_time, rtol=tol, atol=tol)
+        if t is None: 
+            out = odeint(self.odefunc, x, self.integration_time, rtol=tol, atol=tol)
+        else: 
+            integration_time = torch.tensor([0, t]).float().type_as(x)
+            out = odeint(self.odefunc, x, integration_time, rtol=tol, atol=tol)
         return out[1]
 
     @property
@@ -1076,7 +1080,8 @@ def plot_loss_diff_histogram_trimmed(
 
     plt.tight_layout()
     if do_wandb: 
-        wandb.log({f"{save_path}": plt})
+        # wandb.log({f"{save_path}": plt})
+        wandb.log({f"{exp_name} {save_path}": wandb.Image(plt)})
 
     plt.savefig(save_path, dpi=300)
     plt.clf()

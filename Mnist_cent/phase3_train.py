@@ -1072,7 +1072,8 @@ def plot_loss_diff_histogram_trimmed(
 
     plt.tight_layout()
     if do_wandb: 
-        wandb.log({f"{save_path}": plt})
+        # wandb.log({f"{save_path}": plt})
+        wandb.log({f"{exp_name} {save_path}": wandb.Image(plt)})
 
     plt.savefig(save_path, dpi=300)
     plt.clf()

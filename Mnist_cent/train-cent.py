@@ -23,9 +23,9 @@ import wandb
 from model import * 
 
 cent_weight = 0.001
-cent_lr = 0.001
-rad = 1.0
-exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}'
+cent_lr = 0.0
+rad = 20.0
+exp_name = f'cw_{cent_weight}-clr_{cent_lr}-rad{rad}_no_bias'
 do_wandb = True
 # device = torch.device("cuda:0")
 torch.cuda.set_device(1)
@@ -410,7 +410,7 @@ class MLP_OUT(nn.Module):
 
     def __init__(self):
         super(MLP_OUT, self).__init__()
-        self.fc0 = nn.Linear(fc_dim, 10)
+        self.fc0 = nn.Linear(fc_dim, 10, bias=False)
 
     def forward(self, input_):
         h1 = self.fc0(input_)
@@ -1000,13 +1000,10 @@ def evaluate_pgd(
 
 # Clean acc 
 raw_test_loss, raw_test_acc, denoised_test_loss, denoised_test_acc, loss_diffs_clean = evaluate_standard(testloader, combined_model)
-
-if do_wandb:
-    wandb.log({"raw_test_loss": raw_test_loss,
-               "raw_test_acc": raw_test_acc, 
-               "denoised_test_loss": denoised_test_loss, 
-               "denoised_test_acc": denoised_test_acc, 
-               })
+print("raw_test_loss", raw_test_loss)
+print("raw_test_acc", raw_test_acc)
+print("denoised_test_loss", denoised_test_loss)
+print("denoised_test_acc", denoised_test_acc)
 
 
 import numpy as np
@@ -1094,12 +1091,10 @@ plot_loss_diff_histogram_trimmed(
 # PGD generation w/ODE
 no_ode_raw_test_loss, no_ode_raw_test_acc, no_ode_denoised_test_loss, no_ode_denoised_test_acc, loss_diffs_pgd_w_ode = evaluate_pgd(testloader, combined_model, no_ode_in_pgd_generation=False)
 
-if do_wandb:
-    wandb.log({"no_ode_raw_test_loss": no_ode_raw_test_loss,
-               "no_ode_raw_test_acc": no_ode_raw_test_acc, 
-               "no_ode_denoised_test_loss": no_ode_denoised_test_loss, 
-               "no_ode_denoised_test_acc": no_ode_denoised_test_acc, 
-               })
+print("no_ode_raw_test_loss", no_ode_raw_test_loss)
+print("no_ode_raw_test_acc", no_ode_raw_test_acc)
+print("no_ode_denoised_test_loss", no_ode_denoised_test_loss)
+print("no_ode_denoised_test_acc", no_ode_denoised_test_acc)
 
 plot_loss_diff_histogram_trimmed(
     loss_diffs_pgd_w_ode,
@@ -1110,12 +1105,11 @@ plot_loss_diff_histogram_trimmed(
 # PGD generation w.o./ODE
 w_ode_raw_test_loss, w_ode_raw_test_acc, w_ode_denoised_test_loss, w_ode_denoised_test_acc, loss_diffs_pgd_w_o_ode = evaluate_pgd(testloader, combined_model, no_ode_in_pgd_generation=True)
 
-if do_wandb:
-    wandb.log({"w_ode_raw_test_loss": w_ode_raw_test_loss,
-               "w_ode_raw_test_acc": w_ode_raw_test_acc, 
-               "w_ode_denoised_test_loss": w_ode_denoised_test_loss, 
-               "w_ode_denoised_test_acc": w_ode_denoised_test_acc, 
-               })
+print("w_ode_raw_test_loss", w_ode_raw_test_loss)
+print("w_ode_raw_test_acc", w_ode_raw_test_acc,)
+print("w_ode_denoised_test_loss", w_ode_denoised_test_loss,)
+print("w_ode_denoised_test_acc", w_ode_denoised_test_acc,)
+
 
 
 plot_loss_diff_histogram_trimmed(

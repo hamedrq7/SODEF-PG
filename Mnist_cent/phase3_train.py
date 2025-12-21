@@ -682,6 +682,7 @@ class ODEBlock(nn.Module):
 
 
 makedirs(savefolder_fc)
+print(statedic.keys())
 odefunc = ODEfunc_mlp(0)
 feature_layers = [ODEBlock(odefunc)]
 fc_layers = [MLP_OUT()]

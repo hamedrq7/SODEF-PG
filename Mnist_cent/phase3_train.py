@@ -687,7 +687,7 @@ odefunc = ODEfunc_mlp(0)
 feature_layers = [ODEBlock(odefunc)]
 fc_layers = [MLP_OUT()]
 model = nn.Sequential(*feature_layers, *fc_layers).to(device)
-model.load_state_dict(statedic) # [X]
+model.load_state_dict(statedic, strict=False) # [X]
 for param in odefunc.parameters():
     param.requires_grad = False
 
